@@ -43,8 +43,8 @@ This skill turns Claude into a **senior SEO consultant** capable of producing a 
 | Local SEO or Content & Authority | /20 | GBP, NAP, Local Pack / Topical authority, backlinks, rankings |
 | E-E-A-T | /10 | Experience, Expertise, Authoritativeness, Trustworthiness |
 | Entity SEO | /10 | Knowledge Panel, Wikidata, entity consistency, `sameAs` schema |
-| GEO | /20 | Princeton methods, bot access, platform-specific signals, AI citation tests |
-| UX & Conversion | /10 | Navigation, CTAs, trust signals, mobile-first, SERP → landing coherence |
+| GEO | /20 | Princeton methods, bot access, platform-specific signals, AI citation tests, SGE/AI Overviews monitoring |
+| UX & Conversion | /10 | Navigation, CTAs, trust signals, analytics tracking, social signals, SERP → landing coherence |
 
 ---
 
@@ -78,6 +78,14 @@ Based on the **Princeton/KDD 2024 research** (arXiv:2311.09735), the skill evalu
 If you have a Cloudflare account, provide your API token + Account ID to unlock:
 - **CF-A — JS-rendered schema audit**: crawls key pages in a headless browser, detects all JSON-LD including JS-injected markup (Yoast, RankMath, Shopify...)
 - **CF-B — Full site crawl**: audits up to 100+ pages automatically — thin content, orphan pages, missing titles/H1, schema coverage, crawl depth
+
+
+### 📊 GA4 + GSC MCP Integrations *(optional)*
+Connect official MCP servers to replace estimates with real data:
+- **GA4 MCP** (`github.com/googleanalytics/google-analytics-mcp`) → real organic traffic, bounce rates, conversions, social referrals
+- **GSC MCP** (`github.com/ahonn/mcp-server-gsc`) → real rankings, AI Overviews impressions, quick wins, URL inspection, keyword cannibalization
+
+Without MCP: all metrics are estimated from observable signals (clearly flagged in the report).
 
 ### 📝 AI writing detection
 When auditing content quality, the skill checks for AI writing markers (em dashes, "leverage", "robust", "in today's digital age"...) as E-E-A-T negative signals. Includes a full reference with replacements.
@@ -118,6 +126,13 @@ General mode — B2B SaaS
 Cloudflare token: [token] / Account ID: [id]
 ```
 *(With a Cloudflare token, schema detection and full site crawl are automated.)*
+
+```
+Audit https://my-saas.com in General mode — B2B SaaS
+GA4 MCP: connected
+GSC MCP: connected
+```
+*(With GA4 + GSC MCP, all traffic and ranking data is pulled live from real APIs.)*
 
 ---
 
@@ -177,6 +192,8 @@ seo-geo-audit/
 - **Schema validation**: Informed by Google Rich Results Test limitations of static HTML parsers
 - **Technical SEO checklist**: Inspired by [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) (meta robots, security headers, URL structure)
 - **Cloudflare Browser Rendering**: [/crawl endpoint documentation](https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/) (open beta, March 2026)
+- **GA4 MCP**: [google-analytics-mcp](https://github.com/googleanalytics/google-analytics-mcp) — official Google Analytics MCP server
+- **GSC MCP**: [mcp-server-gsc](https://github.com/ahonn/mcp-server-gsc) — Google Search Console MCP with Quick Wins detection
 
 ---
 

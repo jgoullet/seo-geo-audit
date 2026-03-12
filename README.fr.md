@@ -42,8 +42,8 @@ Ce skill transforme Claude en **consultant SEO senior** capable de produire un a
 | SEO Local ou Contenu & Autorité | /20 | GBP, NAP, Local Pack / Topical authority, backlinks, positionnement |
 | E-E-A-T | /10 | Expérience, Expertise, Autorité, Confiance |
 | Entity SEO | /10 | Knowledge Panel, Wikidata, cohérence d'entité, schema `sameAs` |
-| GEO | /20 | Méthodes Princeton, accès bots, signaux par plateforme, tests de citation IA |
-| UX & Conversion | /10 | Navigation, CTA, trust signals, mobile-first, cohérence SERP → landing |
+| GEO | /20 | Méthodes Princeton, bots IA, signaux par plateforme, tests de citation IA, suivi AI Overviews |
+| UX & Conversion | /10 | Navigation, CTAs, signaux de confiance, tracking analytics, signaux sociaux, cohérence SERP → landing |
 
 ---
 
@@ -76,6 +76,14 @@ Basé sur la **recherche Princeton/KDD 2024** (arXiv:2311.09735), le skill éval
 Si vous avez un compte Cloudflare, fournissez votre token API + Account ID pour débloquer :
 - **CF-A — Audit schema JS-rendu** : crawl des pages clés dans un navigateur headless, détecte tout le JSON-LD y compris celui injecté par JS (Yoast, RankMath, Shopify...)
 - **CF-B — Crawl complet du site** : audit automatique de 100+ pages — thin content, pages orphelines, titres/H1 manquants, couverture schema, profondeur de crawl
+
+
+### 📊 Intégrations MCP GA4 + GSC *(optionnelles)*
+Connectez les serveurs MCP officiels pour remplacer les estimations par des données réelles :
+- **GA4 MCP** (`github.com/googleanalytics/google-analytics-mcp`) → trafic organique réel, taux de rebond, conversions, trafic social
+- **GSC MCP** (`github.com/ahonn/mcp-server-gsc`) → positions réelles, impressions AI Overviews, quick wins, inspection d'URL, cannibalisation
+
+Sans MCP : toutes les métriques sont estimées à partir de signaux observables (clairement indiqué dans le rapport).
 
 ### 📝 Détection écriture IA
 Lors de l'audit du contenu, le skill repère les marqueurs d'écriture IA (em dashes, "leverage", "robust", "in today's digital age"...) comme signaux E-E-A-T négatifs. Inclut une référence complète avec alternatives.
@@ -167,6 +175,8 @@ seo-geo-audit/
 - **Détection écriture IA** : Grammarly, Microsoft 365 Life Hacks, GPTHuman, Textero (2025)
 - **Checklist SEO technique** : Inspiré par [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) (meta robots, en-têtes de sécurité, structure URL)
 - **Cloudflare Browser Rendering** : [Documentation endpoint /crawl](https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/) (bêta ouverte, mars 2026)
+- **GA4 MCP** : [google-analytics-mcp](https://github.com/googleanalytics/google-analytics-mcp) — serveur MCP officiel Google Analytics
+- **GSC MCP** : [mcp-server-gsc](https://github.com/ahonn/mcp-server-gsc) — MCP Google Search Console avec détection de quick wins
 - **Validation schema** : Basé sur les limitations connues des parseurs HTML statiques vs Rich Results Test
 
 ---

@@ -66,6 +66,16 @@ OPTIONAL — CLOUDFLARE BROWSER RENDERING
     → If yes: provide token + Cloudflare Account ID
     → Unlocks: Section CF-A (schema audit) and Section CF-B (full site crawl)
     → If no: standard audit with web_fetch + manual schema check tools
+
+OPTIONAL — MCP INTEGRATIONS
+─────────────────────────────
+18. GA4 MCP connected? (github.com/googleanalytics/google-analytics-mcp)
+    → If yes: Unlocks Section GA-A (real Analytics data — traffic, bounce, conversions, social referrals)
+    → If no: metrics estimated from observable signals
+
+19. GSC MCP connected? (github.com/ahonn/mcp-server-gsc or github.com/AminForou/mcp-gsc)
+    → If yes: Unlocks Section GA-B (real GSC data — AI Overviews impressions, rankings, quick wins, URL inspection)
+    → If no: manual checks via Google Search Console interface
 ```
 
 > **Note**: If Analytics/GSC data is not shared, all metrics will be **estimates based on observable signals**. State this clearly in the report.
@@ -251,6 +261,146 @@ Add to the report:
 | Orphan pages detected | |
 
 > ⚠️ **Cost reminder**: `render: true` uses Cloudflare Browser Rendering billing. A 100-page crawl uses ~5 min of browser time. Free plan = 10 min/day. Paid plan ($5/mo) = ~10 hrs/mo included.
+
+---
+---
+
+## Section GA-A: GA4 MCP — Analytics & Tracking Audit *(optional — requires GA4 MCP)*
+
+> **Prerequisite**: Google Analytics MCP connected (`github.com/googleanalytics/google-analytics-mcp`).
+> Skip this section if not connected — state "estimated from observable signals" for all metrics.
+
+### GA-A.1 Tracking implementation check
+
+Query GA4 MCP to verify:
+
+| Check | Query | Expected |
+|---|---|---|
+| GA4 tag present | Real-time users > 0 | ✅ active tracking |
+| No double counting | Sessions vs pageviews ratio | Normal ratio (1.5–4×) |
+| Organic traffic identified | Sessions by channel: `organic search` | > 0 sessions |
+| Goals / conversions configured | Conversion events list | ≥ 1 conversion event |
+| Internal traffic excluded | Filter check | IP filters active |
+
+Flag any anomalies as **tracking issues** in the report — bad data = bad decisions.
+
+### GA-A.2 Organic traffic analysis
+
+| Metric | Query | Benchmark |
+|---|---|---|
+| Organic sessions (last 90 days) | `sessions` filtered by `organic search` | Trend: stable or growing |
+| Organic vs total traffic share | `sessions` by channel | Healthy: > 30% organic |
+| Top organic landing pages | `sessions` by `landingPage`, organic | Top 10 pages |
+| Organic bounce rate | `bounceRate` by channel | < 60% good, > 80% concern |
+| Avg. session duration (organic) | `averageSessionDuration` organic | > 90s good |
+| Mobile vs desktop organic split | `sessions` by `deviceCategory` organic | Mobile > 50% expected |
+
+### GA-A.3 Content performance
+
+| Metric | Query | Signal |
+|---|---|---|
+| Top pages by organic sessions | Top 20 pages — cross-reference with audit | Pages worth auditing first |
+| Pages with high bounce + low time | Bounce rate > 70% AND duration < 30s | Content / UX issue |
+| Pages with 0 organic sessions (30d) | Pages present in sitemap but no organic traffic | Thin / non-indexed content |
+| New vs returning organic visitors | `newUsers` vs `returningUsers` | < 20% returning = low loyalty |
+
+### GA-A.4 Conversion & UX signals
+
+| Metric | Query | Signal |
+|---|---|---|
+| Conversion rate (organic) | `conversions / sessions` organic | Benchmark varies by sector |
+| Top converting organic pages | `conversions` by `landingPage` organic | Protect and optimize these |
+| Social referral traffic | `sessions` by source: `social` | Which platforms drive traffic |
+| Social referral top sources | Sessions by `sessionSource` social | Facebook / LinkedIn / Instagram / Pinterest... |
+
+> Add a **GA4 Data Summary** box to the report with: organic sessions (90d), organic share %, top 5 landing pages, conversion rate organic.
+
+---
+
+## Section GA-B: GSC MCP — AI Overviews & Quick Wins *(optional — requires GSC MCP)*
+
+> **Prerequisite**: Google Search Console MCP connected (`ahonn/mcp-server-gsc` or `AminForou/mcp-gsc`).
+> Skip this section if not connected — use manual GSC interface checks instead.
+
+### GA-B.1 AI Overviews (SGE) monitoring
+
+```
+# Query GSC MCP for AI Overview impressions
+dimensions: query, page
+searchType: web
+dateRange: last 90 days
+filter: searchAppearance = AI_OVERVIEW
+```
+
+| Metric | What to look for |
+|---|---|
+| AI Overview impressions | Total queries where site appears in AI Overviews |
+| AI Overview clicks | CTR from AI Overview citations |
+| AI Overview CTR vs standard | Compare CTR — AI Overview CTR is typically lower |
+| Top queries triggering AI Overview | Which keywords → AI citation |
+| Pages cited in AI Overviews | Which URLs are being cited |
+
+> If AI Overview impressions = 0: the site is not yet cited in Google AI Overviews → treat as GEO priority in the action plan.
+
+### GA-B.2 Quick wins detection
+
+```
+# Positions 4–15 with significant impressions = quick win opportunities
+detectQuickWins: true
+quickWinsConfig:
+  positionRange: [4, 15]
+  minImpressions: 500
+  minCtr: 2
+```
+
+For each quick win identified:
+
+| Page | Keyword | Position | Impressions | CTR | Action |
+|---|---|---|---|---|---|
+| [URL] | [query] | [pos] | [imp] | [ctr]% | Optimize title / content / internal links |
+
+> Quick wins = pages ranking P4–15 with volume — small optimization → jump to P1–3. Highest ROI actions in the plan.
+
+### GA-B.3 Keyword cannibalization detection
+
+```
+# Multiple pages ranking for the same query
+dimensions: query, page
+filter: position < 20
+rowLimit: 5000
+```
+
+Flag queries where 2+ pages rank in top 20 → cannibalization risk → consolidation recommended.
+
+### GA-B.4 URL inspection & indexing health
+
+For the top 20 pages (by impressions), run URL inspection:
+
+| Check | Expected |
+|---|---|
+| Indexing status | Indexed |
+| Last crawl date | < 30 days |
+| Mobile usability | No issues |
+| Rich results eligible | Yes (if schema present) |
+| Canonical URL | Matches intended URL |
+
+Flag any pages with indexing issues, mobile usability errors, or stale crawl dates.
+
+### GA-B.5 Social signals via GSC
+
+```
+# Search appearance: sitelinks, image search, video search
+dimensions: query, searchAppearance
+```
+
+| Signal | What it reveals |
+|---|---|
+| Sitelinks appearing | Strong brand authority |
+| Image search impressions | Visual content indexed and performing |
+| Video search impressions | Video content indexed |
+| Rich result appearances | Schema markup triggering enhancements |
+
+> Add a **GSC Data Summary** box to the report with: total impressions (90d), avg position, AI Overview impressions, top 5 quick wins, pages with indexing issues.
 
 ---
 
@@ -603,6 +753,21 @@ Run the following searches and note whether the site is cited:
 
 **AI Visibility Test subtotal: /20**
 
+### 5.7 SGE / AI Overviews Monitoring
+
+> **If GSC MCP connected** → use Section GA-B for real impression data.
+> **Without GSC MCP** → use manual checks below.
+
+| Check | Method | Signal |
+|---|---|---|
+| AI Overview presence on brand queries | Search `"[brand name]"` — AI Overview visible? | Brand authority |
+| AI Overview presence on sector queries | Search top 5 keywords — site cited? | GEO visibility |
+| GSC AI Overview impressions (if GSC MCP) | Section GA-B query | Trending up / down / zero |
+| SGE CTR vs standard organic CTR | GA-B data or manual estimate | AI Overview CTR typically lower |
+| Featured Snippet → AI Overview correlation | Pages with Featured Snippets often cited in AIO | Protect these pages |
+
+> Pages ranking in Featured Snippets are significantly more likely to be cited in AI Overviews. Identify and protect them as high-priority GEO assets.
+
 **GEO Score: /100 → normalized to /20 in recap**
 
 ---
@@ -638,7 +803,37 @@ Run the following searches and note whether the site is cited:
 
 **Conversion subtotal: /10**
 
-**UX & Conversion Score: /20 → normalized to /10 in recap**
+### 6.3 Analytics & Tracking Implementation
+
+> Check manually via `web_fetch` (look for GA4/GTM tags in HTML) or via GA4 MCP if connected (Section GA-A).
+
+| Criterion | Check | Points |
+|---|---|---|
+| GA4 / analytics tag present | `gtag.js` or GTM snippet in page source | /2 |
+| No duplicate tracking | Single analytics instance per page | /1 |
+| Conversion events configured | ≥ 1 goal / conversion event active | /2 |
+| Internal traffic filtered | Dev/agency IPs excluded | /1 |
+| GSC property verified | Site verified in Search Console | /2 |
+| GSC sitemap submitted | Sitemap present and submitted | /2 |
+
+**Analytics subtotal: /10**
+
+### 6.4 Social Signals & Open Graph
+
+> Social traffic = indirect SEO signal (brand awareness → branded searches → authority). Check via `web_fetch` for OG tags + `web_search` for social presence.
+
+| Criterion | Check | Points |
+|---|---|---|
+| Open Graph tags | `og:title`, `og:description`, `og:image` (1200×630px) present | /2 |
+| Twitter / X Card | `twitter:card` meta tag present | /1 |
+| OG image quality | Image present, correct dimensions, not generic | /2 |
+| Active social profiles | ≥ 2 active profiles with recent posts (< 30 days) | /2 |
+| Social share buttons | Present on blog/article pages | /1 |
+| Social referral traffic | Measurable social traffic (GA4 MCP if available) | /2 |
+
+**Social subtotal: /10**
+
+**UX & Conversion Score: /40 → normalized to /10 in recap**
 
 ---
 

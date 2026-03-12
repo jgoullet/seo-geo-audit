@@ -37,7 +37,7 @@ Ce skill transforme Claude en **consultant SEO senior** capable de produire un a
 
 | Dimension | Max | Ce qui est évalué |
 |---|---|---|
-| SEO Technique | /10 | Title, meta, H1, URLs, HTTPS, sitemap, robots, canonicals, redirections |
+| SEO Technique | /10 | Title, meta robots, H1, URLs, HTTPS, en-têtes de sécurité, sitemap, robots.txt, canonicals, redirections |
 | Core Web Vitals | /10 | LCP, CLS, INP, FCP, TTFB — mobile vs desktop |
 | SEO Local ou Contenu & Autorité | /20 | GBP, NAP, Local Pack / Topical authority, backlinks, positionnement |
 | E-E-A-T | /10 | Expérience, Expertise, Autorité, Confiance |
@@ -71,6 +71,11 @@ Basé sur la **recherche Princeton/KDD 2024** (arXiv:2311.09735), le skill éval
 
 ### ⚠️ Garde-fou détection schema
 `web_fetch` ne peut pas détecter le JSON-LD injecté par JavaScript (Yoast, RankMath, AIOSEO...). Le skill signale cette limitation et redirige vers **Google Rich Results Test** pour éviter les faux négatifs.
+
+### ☁️ Cloudflare Browser Rendering *(optionnel)*
+Si vous avez un compte Cloudflare, fournissez votre token API + Account ID pour débloquer :
+- **CF-A — Audit schema JS-rendu** : crawl des pages clés dans un navigateur headless, détecte tout le JSON-LD y compris celui injecté par JS (Yoast, RankMath, Shopify...)
+- **CF-B — Crawl complet du site** : audit automatique de 100+ pages — thin content, pages orphelines, titres/H1 manquants, couverture schema, profondeur de crawl
 
 ### 📝 Détection écriture IA
 Lors de l'audit du contenu, le skill repère les marqueurs d'écriture IA (em dashes, "leverage", "robust", "in today's digital age"...) comme signaux E-E-A-T négatifs. Inclut une référence complète avec alternatives.
@@ -160,6 +165,8 @@ seo-geo-audit/
 - **Méthodes GEO** : Princeton University / IIT Delhi / Georgia Tech / Allen Institute for AI — *"GEO: Generative Engine Optimization"*, KDD 2024 ([arXiv:2311.09735](https://arxiv.org/abs/2311.09735))
 - **Algorithmes plateformes** : Étude SE Ranking (129K domaines), analyse architecture Perplexity Sonar, Google Search Quality Rater Guidelines
 - **Détection écriture IA** : Grammarly, Microsoft 365 Life Hacks, GPTHuman, Textero (2025)
+- **Checklist SEO technique** : Inspiré par [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) (meta robots, en-têtes de sécurité, structure URL)
+- **Cloudflare Browser Rendering** : [Documentation endpoint /crawl](https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/) (bêta ouverte, mars 2026)
 - **Validation schema** : Basé sur les limitations connues des parseurs HTML statiques vs Rich Results Test
 
 ---

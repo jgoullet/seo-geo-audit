@@ -38,7 +38,7 @@ This skill turns Claude into a **senior SEO consultant** capable of producing a 
 
 | Dimension | Max | What's evaluated |
 |---|---|---|
-| SEO Technique | /10 | Title, meta, H1, URLs, HTTPS, sitemap, robots, canonicals, redirects |
+| SEO Technique | /10 | Title, meta robots, H1, URLs, HTTPS, security headers, sitemap, robots.txt, canonicals, redirects |
 | Core Web Vitals | /10 | LCP, CLS, INP, FCP, TTFB — mobile vs desktop |
 | Local SEO or Content & Authority | /20 | GBP, NAP, Local Pack / Topical authority, backlinks, rankings |
 | E-E-A-T | /10 | Experience, Expertise, Authoritativeness, Trustworthiness |
@@ -71,7 +71,13 @@ Based on the **Princeton/KDD 2024 research** (arXiv:2311.09735), the skill evalu
 - Google Knowledge Panel, Wikidata ID, `Organization` + `sameAs` schema
 
 ### ⚠️ Schema detection guard
-`web_fetch` cannot detect JavaScript-injected JSON-LD (Yoast, RankMath, AIOSEO...). The skill flags this limitation and redirects to **Google Rich Results Test** to avoid false negatives.
+`web_fetch` cannot detect JavaScript-injected JSON-LD (Yoast, RankMath, AIOSEO...). The skill flags this and offers two paths: use **Cloudflare Browser Rendering** (automated, JS-rendered) if a token is available, or redirect to **Google Rich Results Test** to avoid false negatives.
+
+
+### ☁️ Cloudflare Browser Rendering *(optional)*
+If you have a Cloudflare account, provide your API token + Account ID to unlock:
+- **CF-A — JS-rendered schema audit**: crawls key pages in a headless browser, detects all JSON-LD including JS-injected markup (Yoast, RankMath, Shopify...)
+- **CF-B — Full site crawl**: audits up to 100+ pages automatically — thin content, orphan pages, missing titles/H1, schema coverage, crawl depth
 
 ### 📝 AI writing detection
 When auditing content quality, the skill checks for AI writing markers (em dashes, "leverage", "robust", "in today's digital age"...) as E-E-A-T negative signals. Includes a full reference with replacements.
@@ -105,6 +111,13 @@ I have access to Google Search Console
 ```
 
 The skill will collect missing info, run the full audit using web search and web fetch, and deliver a structured report scored /90 with a prioritized action plan.
+
+```
+Run a full SEO audit of https://my-saas.com
+General mode — B2B SaaS
+Cloudflare token: [token] / Account ID: [id]
+```
+*(With a Cloudflare token, schema detection and full site crawl are automated.)*
 
 ---
 
@@ -149,6 +162,8 @@ The skill will collect missing info, run the full audit using web search and web
 ```
 seo-geo-audit/
 ├── SKILL.md                  # Main skill — full audit framework
+├── README.md                 # This file
+├── README.fr.md              # French documentation
 └── ai-writing-detection.md   # Reference — AI writing markers to avoid
 ```
 
@@ -160,6 +175,8 @@ seo-geo-audit/
 - **Platform algorithms**: SE Ranking study (129K domains), Perplexity Sonar architecture analysis, Google Search Quality Rater Guidelines
 - **AI writing detection**: Grammarly, Microsoft 365 Life Hacks, GPTHuman, Textero (2025)
 - **Schema validation**: Informed by Google Rich Results Test limitations of static HTML parsers
+- **Technical SEO checklist**: Inspired by [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) (meta robots, security headers, URL structure)
+- **Cloudflare Browser Rendering**: [/crawl endpoint documentation](https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/) (open beta, March 2026)
 
 ---
 

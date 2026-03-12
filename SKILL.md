@@ -59,6 +59,13 @@ TECHNICAL CONTEXT & ACCESS
 14. CMS used? (WordPress, Shopify, Webflow, Wix, custom...)
 15. Known Google penalties? (manual or algorithmic)
 16. Available resources (solo, internal team, agency)
+
+OPTIONAL — CLOUDFLARE BROWSER RENDERING
+─────────────────────────────────────────
+17. Cloudflare API token? (enables JS-rendered schema detection + full site crawl)
+    → If yes: provide token + Cloudflare Account ID
+    → Unlocks: Section CF-A (schema audit) and Section CF-B (full site crawl)
+    → If no: standard audit with web_fetch + manual schema check tools
 ```
 
 > **Note**: If Analytics/GSC data is not shared, all metrics will be **estimates based on observable signals**. State this clearly in the report.
@@ -90,28 +97,35 @@ Use `web_search` and `web_fetch` to analyze:
 | HTTPS | Active, valid certificate, no mixed content | /1 |
 | Mobile responsive | Adaptive design, no hidden content on mobile | /1 |
 | XML Sitemap | Present (`/sitemap.xml`), submitted to GSC, up to date | /1 |
-| Robots.txt | Not blocking important pages (`/robots.txt`) | /1 |
+| Robots.txt | Not blocking important pages — check `/robots.txt`; AI bots verified in Section 5.1 | /1 |
+| Meta robots | No `noindex` on important pages; no `max-snippet:0` blocking rich results | /1 |
 | 404 Errors | None on main pages, clean 301 redirects | /1 |
 | Redirects | No redirect chains (max 1 hop), no loops | /1 |
 | Canonicals | `rel="canonical"` tags correctly implemented | /1 |
 | Duplication | No internal or cross-page duplicate content | /1 |
 | Pagination | Correctly handled (canonical or GSC signal) | /1 |
 | Hreflang | Present and correct if multilingual site | /1 |
+| Security headers | `Strict-Transport-Security`, `X-Content-Type-Options` present (E-E-A-T trust signal) | /1 |
+| URL structure | Hyphens (not underscores), lowercase, < 75 chars, keywords present, no unnecessary parameters | /1 |
 
-**Technical subtotal: /10**
+**Technical subtotal: /12 → normalized /10**
 
-> ⚠️ **CRITICAL LIMITATION — Schema Markup Detection via `web_fetch`**
+> **How to check meta robots**: `web_fetch` the page HTML and search for `<meta name="robots"`. Flag any `noindex`, `noarchive`, `nosnippet`, or `max-snippet:0` on pages that should appear in SERPs.
 >
-> `web_fetch` and `curl` **cannot detect JSON-LD structured data** injected via JavaScript. Many CMS plugins (WordPress + Yoast, RankMath, AIOSEO; Shopify; Webflow) inject schema client-side — it is **invisible in static HTML**.
+> **How to check security headers**: `web_fetch` the URL and inspect response headers, or `web_search: "security headers [domain]"` using securityheaders.com.
+
+> ⚠️ **Schema Markup Detection — Choose your method based on available access**
 >
-> ❌ Concluding "no schema found" based solely on `web_fetch` = **false audit finding**.
+> `web_fetch` **cannot detect JSON-LD injected via JavaScript** (Yoast, RankMath, Shopify, Webflow...). Always use one of the methods below.
 >
-> ✅ **Reliable methods for schema auditing:**
-> 1. **Google Rich Results Test** → https://search.google.com/test/rich-results *(renders JavaScript)*
-> 2. **Schema.org Validator** → https://validator.schema.org *(renders JavaScript)*
-> 3. **Screaming Frog** *(if provided by client — renders JavaScript)*
+> **🟦 If Cloudflare API token provided** → use Section CF-A below (JS-rendered, fully automated)
 >
-> Always state in the report which method was used for schema detection, and flag uncertainty if only `web_fetch` was available.
+> **🔲 Without Cloudflare token** → use one of these manual tools:
+> 1. **Google Rich Results Test** → https://search.google.com/test/rich-results
+> 2. **Schema.org Validator** → https://validator.schema.org
+> 3. **Screaming Frog** *(if provided by client)*
+>
+> Always state in the report which method was used, and flag uncertainty if none was available.
 
 ### 1.3 Core Web Vitals *(critical — direct ranking impact)*
 
@@ -131,6 +145,112 @@ Fetch data from PageSpeed Insights (`web_search: "PageSpeed Insights [URL]"`):
 **Core Web Vitals subtotal: /10**
 
 **Technical SEO Global Score: /30**
+
+---
+---
+
+## Section CF-A: Cloudflare — JS-Rendered Schema Audit *(optional — requires API token)*
+
+> **Prerequisite**: Cloudflare API token + Account ID provided in Step 0.
+> Skip this section if no token was provided and use manual tools instead (see guardrail above).
+
+Use the Cloudflare Browser Rendering `/crawl` endpoint with `render: true` to extract JS-injected structured data.
+
+### CF-A.1 Initiate the crawl (schema-focused)
+
+```
+POST https://api.cloudflare.com/client/v4/accounts/{account_id}/browser-rendering/crawl
+Authorization: Bearer {api_token}
+Content-Type: application/json
+
+{
+  "url": "[SITE URL]",
+  "render": true,
+  "limit": 10,
+  "responseFormat": "json",
+  "allowedDomains": ["[DOMAIN ONLY]"]
+}
+```
+
+> Use `limit: 10` to crawl homepage + key pages (service, product, about, contact). Increase to 50+ for a deeper audit.
+
+### CF-A.2 Retrieve and analyze results
+
+```
+GET https://api.cloudflare.com/client/v4/accounts/{account_id}/browser-rendering/crawl/{job_id}
+Authorization: Bearer {api_token}
+```
+
+Poll until `status: finished`. Then for each page, extract and analyze:
+
+| Schema type | What to check |
+|---|---|
+| `FAQPage` | Present on FAQ / support pages |
+| `LocalBusiness` | Complete with `sameAs`, address, hours |
+| `Organization` | `sameAs` pointing to all official profiles |
+| `Article` + `dateModified` | On all blog/news articles |
+| `Product` / `Offer` | On e-commerce product pages |
+| `BreadcrumbList` | On all multi-level pages |
+| `AggregateRating` | On pages with reviews |
+| `HowTo` | On tutorial / guide pages |
+
+Report: list schemas found per page, schemas missing, and pages without any structured data.
+
+---
+
+## Section CF-B: Cloudflare — Full Site Crawl *(optional — requires API token)*
+
+> **Prerequisite**: Cloudflare API token + Account ID provided in Step 0.
+> This section replaces the manual page-by-page sampling with a comprehensive site-wide audit.
+
+### CF-B.1 Initiate the full crawl
+
+```
+POST https://api.cloudflare.com/client/v4/accounts/{account_id}/browser-rendering/crawl
+Authorization: Bearer {api_token}
+Content-Type: application/json
+
+{
+  "url": "[SITE URL]",
+  "render": true,
+  "limit": 100,
+  "responseFormat": "markdown"
+}
+```
+
+> Adjust `limit` based on site size. Use `render: false` for purely static sites (faster, free during beta).
+
+### CF-B.2 What to extract from crawl results
+
+Once the crawl is complete, analyze the full page inventory for:
+
+| Audit dimension | What to look for across all pages |
+|---|---|
+| **Thin content** | Pages with < 300 words — flag each URL |
+| **Missing title / H1** | Pages where title or H1 is absent or duplicated |
+| **Duplicate content** | Near-identical pages — potential cannibalization |
+| **Broken internal links** | URLs discovered but returning errors |
+| **Orphan pages** | Pages not linked from anywhere else on the site |
+| **Schema coverage** | % of pages with structured data vs without |
+| **Crawl depth** | Pages more than 3 clicks from the homepage |
+| **Missing meta descriptions** | Flag each URL |
+| **hreflang consistency** | If multilingual — flag mismatches |
+
+### CF-B.3 Crawl summary table
+
+Add to the report:
+
+| Metric | Value |
+|---|---|
+| Total pages crawled | |
+| Pages with thin content (< 300 words) | |
+| Pages without title tag | |
+| Pages without H1 | |
+| Pages without schema markup | |
+| Estimated crawl depth > 3 clicks | |
+| Orphan pages detected | |
+
+> ⚠️ **Cost reminder**: `render: true` uses Cloudflare Browser Rendering billing. A 100-page crawl uses ~5 min of browser time. Free plan = 10 min/day. Paid plan ($5/mo) = ~10 hrs/mo included.
 
 ---
 

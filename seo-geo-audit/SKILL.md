@@ -11,7 +11,7 @@ description: >
 
 # 🔍 seo-geo-audit — Expert SEO + GEO Audit Skill
 
-> **Report language**: Ask the user at Step 0. Default is **English**. French available on request.
+> **Report language**: Always in **English** by default. Switch to French only if the user explicitly requests it.
 
 ---
 
@@ -38,7 +38,7 @@ ESSENTIAL INFORMATION
 1. URL of the site to audit
 2. Mode: Local 🏘️ or General 🌐?
    (If unclear → analyze the site and suggest the best fit)
-3. Report language: English or French?
+3. Report language: English (default) — mention if you prefer French
 
 4. [If Local] Target city / geographic area
 5. [If Local] Business sector (restaurant, plumber, doctor...)
@@ -584,7 +584,7 @@ For each competitor, identify:
 
 ## Step 8: Expert Final Report
 
-Generate a structured report. The title and intro clearly state the mode (🏘️ Local or 🌐 General) and the language chosen in Step 0.
+Generate a structured report. The title and intro clearly state the mode (🏘️ Local or 🌐 General) and the language (English by default, or French if requested).
 
 ### Report Structure
 

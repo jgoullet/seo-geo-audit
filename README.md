@@ -91,17 +91,17 @@ Each action includes: effort estimate, traffic/leads impact, required resources.
 ## Example usage
 
 ```
-Audite mon site https://monsite.fr en mode Local.
-Je suis plombier à Lyon.
-Mes concurrents : plombier-lyon1.fr et plombier-express-lyon.fr
-Objectif : apparaître dans le Local Pack Google
+Audit https://mypizza.com in Local mode.
+I run a pizza restaurant in Chicago.
+Competitors: giordanos.com and loumalnatispizza.com
+Goal: appear in the Google Local Pack
 ```
 
 ```
-Fais un audit SEO complet de https://ma-boutique.com
-Mode Général — e-commerce mode & accessoires
-Concurrents : asos.fr, zalando.fr
-J'ai accès à Google Search Console
+Run a full SEO audit of https://my-store.com
+General mode — fashion & accessories e-commerce
+Competitors: asos.com, zara.com
+I have access to Google Search Console
 ```
 
 The skill will collect missing info, run the full audit using web search and web fetch, and deliver a structured report scored /90 with a prioritized action plan.
@@ -111,13 +111,13 @@ The skill will collect missing info, run the full audit using web search and web
 ## Report structure
 
 ```
-1. RÉSUMÉ EXÉCUTIF         — Score /90, ranking vs competitors, top 3 strengths/weaknesses
-2. TABLEAU DE BORD         — All 7 dimensions with 🔴/🟡/🟢 indicators
-3. RÉSULTATS DÉTAILLÉS     — Score + justification + sources per dimension
-4. ANALYSE CONCURRENTIELLE — Comparison table + keyword gap (top 10 targets)
-5. PLAN D'ACTION + ROI     — Quick wins / Medium / Long term with impact estimates
-6. MÉTRIQUES DE SUIVI      — KPIs to track + alerts to configure
-7. GLOSSAIRE               — Technical terms explained for non-specialists
+1. EXECUTIVE SUMMARY         — Score /90, ranking vs competitors, top 3 strengths/weaknesses
+2. SCORE DASHBOARD         — All 7 dimensions with 🔴/🟡/🟢 indicators
+3. DETAILED RESULTS     — Score + justification + sources per dimension
+4. COMPETITIVE ANALYSIS — Comparison table + keyword gap (top 10 targets)
+5. ACTION PLAN + ROI     — Quick wins / Medium / Long term with impact estimates
+6. TRACKING METRICS      — KPIs to track + alerts to configure
+7. GLOSSARY               — Technical terms explained for non-specialists
 8. CONCLUSION              — 3-sentence synthesis + re-audit recommendation
 ```
 

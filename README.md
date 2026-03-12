@@ -4,7 +4,7 @@
 
 > **Expert SEO audit (Local or General) + GEO (Generative Engine Optimization)**  
 > Score-based report /90 · Competitive analysis · AI visibility · Prioritized action plan with ROI estimates  
-> Reports generated **in French** 🇫🇷
+> Reports generated in **English by default** · French available on request
 
 ---
 
@@ -169,4 +169,4 @@ MIT — free to use, modify, and redistribute.
 
 ---
 
-*Rapport généré en français · Report in French · Compatible Claude Code & Claude.ai*
+*English report by default · French available on request · Compatible Claude Code & Claude.ai*

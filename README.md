@@ -15,10 +15,10 @@
 # Download the .skill file from Releases and install via Settings > Skills
 
 # Claude Code
-npx skills add https://github.com/YOUR_USERNAME/seo-geo-audit --skill seo-geo-audit
+npx skills add https://github.com/jgoullet/seo-geo-audit --skill seo-geo-audit
 
 # OpenAI Codex CLI
-npx skills add https://github.com/YOUR_USERNAME/seo-geo-audit --skill seo-geo-audit
+npx skills add https://github.com/jgoullet/seo-geo-audit --skill seo-geo-audit
 ```
 
 ---

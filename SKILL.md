@@ -669,6 +669,10 @@ Search for the 5–10 main sector keywords:
 
 > ⚠️ **Important**: Claude uses **Brave Search** (not Google or Bing). To be cited by Claude, the site must be indexed by Brave Search AND allow ClaudeBot/anthropic-ai.
 
+> 🚨 **Cloudflare WAF check** (Bobbink/Friends of Search 2026): Cloudflare's default WAF rules can silently block AI crawlers even when `robots.txt` allows them. Check: Cloudflare dashboard → Security → Events → filter by blocked user-agents. GPTBot, ClaudeBot, PerplexityBot must not appear as blocked. This is a common invisible GEO blocker.
+
+> 📊 **AI crawler growth context** (Cloudflare 2025): GPTBot +305% YoY — ChatGPT-User +2,825% — PerplexityBot +157,490% in raw requests. Crawl-to-citation ratio: Google 3:1 vs OpenAI 400:1 vs Anthropic 100,000:1. Note: 30% of AI scrapers now bypass `robots.txt` blocks (TollBit Q4 2025).
+
 **AI Bot Accessibility subtotal: /10**
 
 ---
@@ -789,6 +793,10 @@ Search for the 5–10 main sector keywords:
 
 **Platform Optimization subtotal: /10** *(overall qualitative assessment)*
 
+> 📊 **Brand mentions vs backlinks** (Ahrefs, December 2025 — 75,000 brands analyzed): Brand mentions across the web correlate **3× more** with AI citations than traditional backlinks. YouTube mentions show the strongest correlation across all AI platforms. 76.1% of AI-cited URLs also rank in Google's top 10. Key implication: *topics are the new keywords, topical authority is the new PageRank* — unlinked brand mentions are now a first-class GEO signal to track and build.
+
+> 🛠️ **Recommended tools for GEO audit**: [Glippy.dev](https://glippy.dev) (AI visibility auditor by Jan-Willem Bobbink) — audits crawlability, renderability, and structured data from an AI agent perspective.
+
 ---
 
 ### 5.6 AI Visibility Test
@@ -830,6 +838,30 @@ Run the following searches and note whether the site is cited:
 | Featured Snippet → AI Overview correlation | Pages with Featured Snippets often cited in AIO | Protect these pages |
 
 > Pages ranking in Featured Snippets are significantly more likely to be cited in AI Overviews. Identify and protect them as high-priority GEO assets.
+
+#### 🔲 Without GSC MCP — Query Fan-Out Detection (manual)
+
+AI systems (ChatGPT, Perplexity, Google AI Mode) decompose user queries into multiple sub-queries before searching the web — a mechanism called **query fan-out**. These sub-queries are longer, more conversational, and invisible in standard keyword reports. They do appear in GSC as long-tail impressions.
+
+**Manual method — GSC Performance tab → Queries → Filter → Custom (regex):**
+
+```
+# Step 1 — Capture all queries 10+ words (typical AI sub-query length)
+(\b\w+\b\s){9,}
+Filter: impressions > 100 to go straight to real opportunities
+```
+
+```
+# Step 2 — Isolate AI-preferred formats (combine with Step 1)
+^(?i)(how|what|which|why|best way|step by step|guide|compare|vs|difference|is it|can i|should i).*
+```
+
+**What this reveals:**
+- Pages already ranking on AI sub-queries without intentional targeting
+- Thematic clusters that AIs push as sub-queries
+- Content to enrich in priority: step-by-step, comparisons (X vs Y), practical guides
+
+> ⚡ **Enrichment priority**: any page generating 100+ impressions on 10+ word queries is a GEO quick win — add structured steps, a comparison table, or a FAQ block to increase citation probability.
 
 **GEO Score: /100 → normalized to /20 in recap**
 

@@ -56,8 +56,11 @@ Chaque dimension reçoit un score chiffré avec justification. Plus de recommand
 Basé sur la **recherche Princeton/KDD 2024** (arXiv:2311.09735), le skill évalue :
 - Les **9 méthodes GEO** avec leurs boosts de visibilité mesurés (+40% citations, +37% statistiques...)
 - **L'accès des bots IA** dans `robots.txt` (GPTBot, PerplexityBot, ClaudeBot, anthropic-ai, Bingbot...)
+- **Check Cloudflare WAF** : les règles Cloudflare par défaut peuvent bloquer silencieusement les bots IA même si `robots.txt` les autorise — un bloqueur GEO invisible très courant
 - Les signaux de ranking spécifiques à **ChatGPT, Perplexity, Google AI Overview, Copilot et Claude**
 - À noter : Claude utilise **Brave Search** (pas Google/Bing) — un détail critique souvent manqué
+- **Détection query fan-out** : regex GSC pour identifier les requêtes longue traîne conversationnelles générées par la décomposition en sous-queries des IA — avec ou sans GSC MCP
+- **Brand mentions vs backlinks** (Ahrefs déc. 2025, 75K marques) : les mentions de marque corrèlent 3× plus avec les citations IA que les backlinks — les mentions YouTube montrent la corrélation la plus forte sur toutes les plateformes IA
 
 ### 🏘️ SEO Local approfondi
 - Audit complet Google Business Profile (12 critères)

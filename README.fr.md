@@ -64,6 +64,8 @@ Basé sur la **recherche Princeton/KDD 2024** (arXiv:2311.09735), le skill éval
 - Cohérence NAP sur tous les annuaires
 - Positionnement Local Pack
 - Validation du schema LocalBusiness
+- **Analyse de vélocité des avis** : comparatif avis/mois vs concurrents + objectif mensuel pour rattraper le leader
+- **Templates de réponse aux avis** : 12 modèles prêts à l'emploi (4 types × 3 variations) avec intégration naturelle de mots-clés service + ville
 
 ### 🎯 E-E-A-T & Entity SEO
 - Credentials auteurs, conformité YMYL, signaux de confiance

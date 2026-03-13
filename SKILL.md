@@ -462,6 +462,69 @@ Search: `"[trade] [city]"`, `"[trade] near me"`, `"best [trade] [city]"`:
 **Local SEO Score: /60 → normalized to /20 in recap**
 
 ---
+---
+
+### 2A.4 Review Velocity & Response Strategy *(Local mode — delivers actionable templates)*
+
+> Reviews are the most visible local ranking factor. This section goes beyond star rating — it analyzes **velocity** (how fast competitors gain reviews) and delivers a ready-to-use **response template system** that turns every response into a keyword-rich ranking signal.
+
+#### Review velocity analysis
+
+Search `web_search: "site:google.com/maps [competitor name]"` and analyze recent reviews:
+
+| Metric | My Business | Competitor 1 | Competitor 2 | Competitor 3 |
+|---|---|---|---|---|
+| Total reviews | | | | |
+| Reviews last 30 days | | | | |
+| Reviews last 90 days | | | | |
+| Average rating | | | | |
+| % reviews with owner response | | | | |
+| Avg response time | | | | |
+| Keywords mentioned in reviews | | | | |
+| Neighborhoods mentioned | | | | |
+
+> **Reviews per month needed to catch leader**: calculate `(leader total - my total) / 6 months` → this becomes the review velocity target in the action plan.
+
+> ⚡ **Key insight**: Reviews mentioning specific services and neighborhoods ("great furnace install in Lincoln Park") are ranking signals. Analyze what customers say in competitor reviews — then ask your own happy customers to mention those same services and areas.
+
+#### Review response template system
+
+Generate the following templates — each must naturally include **service + city keywords** without sounding robotic. Produce **3 variations per type** to avoid repetitive-looking responses.
+
+**Template A — 5-star review** *(keyword-rich, warm)*
+```
+Thank you [first name]! We're so glad the [specific service] went smoothly for you in [neighborhood/city].
+The team really enjoyed working on your [job detail if mentioned]. If you ever need [related service],
+don't hesitate to reach out — we're always here for [city] homeowners. ⭐
+```
+*Customize: insert primary keyword + service area + related service upsell*
+
+**Template B — 4-star review** *(acknowledge + invite feedback)*
+```
+Thank you for the kind words, [first name]! We're glad the [service] met your expectations.
+We always aim for 5-star [service] in [city] — if there's anything we can improve,
+please don't hesitate to reach out directly at [phone/email]. We'd love to earn that 5th star.
+```
+
+**Template C — 3-star review** *(professional + resolution-focused)*
+```
+Thank you for taking the time to share your feedback, [first name].
+We're sorry the [service] experience didn't fully meet your expectations — that's not the standard
+we hold ourselves to for [city] customers. Please contact us at [phone] so we can make this right.
+```
+
+**Template D — 1–2 star review** *(defuse, never defensive)*
+```
+Thank you for your feedback, [first name]. We take every review seriously and we're sorry
+your experience with [service] didn't reflect our usual standards. We'd genuinely like to
+resolve this — please reach out to us directly at [phone/email] so we can make it right.
+```
+
+> 🔑 **SEO value of responses**: 12 reviews/month × keyword-rich response = 144 pieces of location + service keyword content on your GBP per year. Compounding signal that most competitors ignore entirely.
+
+> 📋 **Deliverable**: Include the 4 template sets (3 variations each = 12 templates total) as an appendix in the final report, ready to copy-paste.
+
+---
 
 ## Step 2B: Content & Authority Audit 🌐 *(General mode only)*
 

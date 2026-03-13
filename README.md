@@ -65,6 +65,8 @@ Based on the **Princeton/KDD 2024 research** (arXiv:2311.09735), the skill evalu
 - NAP consistency across all directories
 - Local Pack positioning
 - LocalBusiness schema validation
+- **Review velocity analysis**: competitor reviews/month comparison + target to catch the leader
+- **Review response templates**: 12 ready-to-use templates (4 types × 3 variations) with natural service + city keyword integration
 
 ### 🎯 E-E-A-T & Entity SEO
 - Author credentials, YMYL compliance, trust signals

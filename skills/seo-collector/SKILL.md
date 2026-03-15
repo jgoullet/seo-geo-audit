@@ -1,16 +1,17 @@
 ---
 name: seo-collector
 description: >
-  Collecteur automatique de données SEO techniques. Crawl un site web et produit un fichier
-  site-data.json structuré contenant : balises title/meta/H1, robots.txt, sitemap, headers HTTP,
-  Core Web Vitals (via PageSpeed Insights), détection schema markup, analyse robots.txt pour les
-  bots IA, et snapshot des pages principales. Ce skill est la première étape du pipeline SEO-GEO :
-  il collecte les données brutes que le skill seo-geo-audit consomme ensuite pour produire l'audit.
-  Utilise ce skill quand l'utilisateur dit : "collecte les données SEO de [url]", "crawl ce site",
-  "analyse technique de [url]", "prépare les données pour l'audit", "lance le collecteur sur [url]",
-  "scrape les métriques SEO", ou quand le skill seo-geo-audit a besoin de données techniques brutes.
-  Déclenche aussi pour : "vérifie les Core Web Vitals de", "check le robots.txt de", "analyse les
-  meta tags de", "est-ce que les bots IA peuvent accéder à".
+  Automated SEO data collector. Crawls a website and produces a structured site-data.json file
+  containing: title/meta/H1 tags, robots.txt, sitemap, HTTP headers, Core Web Vitals (via PageSpeed
+  Insights), schema markup detection, AI bot access analysis in robots.txt, and sample page snapshots.
+  Optionally integrates Ahrefs MCP for real backlink data, domain rating, organic keywords, and
+  competitor identification. This skill is Step 1 of the SEO-GEO pipeline: it collects raw data
+  that seo-geo-audit consumes to produce the audit.
+  Use this skill when the user says: "collect SEO data for [url]", "crawl this site",
+  "technical analysis of [url]", "prepare data for the audit", "run the collector on [url]",
+  "scrape SEO metrics", "check the Core Web Vitals of", "check the robots.txt of",
+  "analyze the meta tags of", "can AI bots access [url]", "get backlink data for [url]".
+  Also triggers for: "collecte les données SEO de", "analyse technique de", "crawl ce site".
 ---
 
 # Skill: SEO Collector — Automated technical data collection
@@ -19,17 +20,17 @@ All responses and logs are produced **in English by default**. Switch to the use
 
 ---
 
-## Vue d'ensemble
+## Overview
 
-Ce skill crawl automatiquement un site web et produit un fichier `site-data.json` structuré, prêt à être consommé par le skill `seo-geo-audit`. Il remplace la collecte manuelle d'informations (étape 0 de l'audit).
+This skill automatically crawls a website and produces a structured `site-data.json` file, ready to be consumed by the `seo-geo-audit` skill. It replaces manual information gathering (Step 0 of the audit).
 
-### Position dans le pipeline
+### Position in the pipeline
 
 ```
 [seo-shared-context] → client-profile.md
                             ↓
               ┌─────────────────────────┐
-              │  SEO COLLECTOR (ce skill) │
+              │  SEO COLLECTOR (this)   │
               └─────────────────────────┘
                             ↓
                      site-data.json
@@ -41,302 +42,232 @@ Ce skill crawl automatiquement un site web et produit un fichier `site-data.json
 
 ---
 
-## Étape 0 : Vérifications préalables
+## Step 0: Prerequisites
 
-### Entrées requises
-- **URL du site** (obligatoire)
-- **client-profile.md** (optionnel — si disponible, le charger pour connaître le mode Local/Général, les concurrents, le CMS)
+### Required inputs
+- **Site URL** (required)
+- **`client-profile.md`** (optional — if available, load it for mode, competitors, CMS info)
 
-### Vérification de base
-Avant de commencer, tester que le site est accessible :
+### Optional MCP integrations
 
+#### Ahrefs MCP *(recommended — replaces estimates with real data)*
+
+> Ahrefs MCP is available on **Lite, Standard, Advanced, and Enterprise plans** (from $29/month Starter). It provides real backlink data, domain rating, organic keywords, and competitor identification — all data that the collector would otherwise estimate.
+
+If Ahrefs MCP is connected, the collector will use it to pull:
+
+| Ahrefs endpoint | What it provides | Replaces |
+|---|---|---|
+| `domain-rating` | Real DR score (0-100) + Ahrefs Rank | Estimated authority |
+| `backlinks-stats` | Total backlinks, referring domains, dofollow/nofollow | "Estimated from web search" |
+| `broken-backlinks` | Broken inbound links list | Not available without Ahrefs |
+| `organic-keywords` | Keywords the site ranks for + positions + volumes | Manual keyword search |
+| `organic-competitors` | Top organic competitors identified by Ahrefs | "Identify via web_search" |
+| `top-pages` | Pages driving the most organic traffic | Sample crawl guesswork |
+| `batch-url-analysis` | SEO metrics for multiple URLs at once | One-by-one page crawl |
+| `brand-radar` | Brand mentions across AI agents (ChatGPT, Perplexity...) | Manual GEO visibility test |
+
+**How to connect**: The user provides their Ahrefs account via MCP. No API key pasting needed — MCP handles authentication.
+
+**If Ahrefs MCP is NOT connected**: All metrics are estimated from observable signals via `web_search` and `web_fetch`. Clearly flag this in the output: `"source": "estimated"` vs `"source": "ahrefs_mcp"`.
+
+#### GA4 MCP *(optional)*
+If connected (`github.com/googleanalytics/google-analytics-mcp`), pull real organic traffic, bounce rates, conversions.
+
+#### GSC MCP *(optional)*
+If connected (`github.com/ahonn/mcp-server-gsc`), pull real rankings, impressions, AI Overviews data, URL inspection.
+
+### Base verification
+
+Before starting, test that the site is accessible:
 ```
 web_fetch: [URL]
 ```
-
-Si erreur (timeout, 5xx, site en maintenance) → noter dans le rapport et arrêter. Si redirection → suivre et noter l'URL finale.
-
----
-
-## Étape 1 : Collecte des métadonnées de la page d'accueil
-
-Utiliser `web_fetch` sur l'URL principale et extraire :
-
-### 1.1 Balises HTML essentielles
-
-```json
-{
-  "homepage": {
-    "url_final": "[URL après redirections]",
-    "status_code": 200,
-    "title": "[contenu de <title>]",
-    "title_length": 55,
-    "meta_description": "[contenu de meta description]",
-    "meta_description_length": 148,
-    "h1": "[contenu du H1]",
-    "h1_count": 1,
-    "h2_list": ["H2 1", "H2 2", "..."],
-    "canonical": "[URL canonical]",
-    "lang": "fr",
-    "hreflang": ["fr", "en"],
-    "viewport_meta": true,
-    "og_tags": {
-      "og:title": "...",
-      "og:description": "...",
-      "og:image": "...",
-      "og:type": "..."
-    },
-    "twitter_card": "summary_large_image"
-  }
-}
-```
-
-### 1.2 Détection du CMS
-
-Chercher dans le HTML source des marqueurs :
-- WordPress : `wp-content/`, `wp-includes/`, meta generator "WordPress"
-- Shopify : `cdn.shopify.com`, `Shopify.theme`
-- Webflow : `webflow.com`, `.w-` classes
-- Wix : `wix.com`, `_wix_browser_sess`
-- Next.js : `__NEXT_DATA__`, `_next/`
-- Autre : noter les frameworks JS détectés
+If error (timeout, 5xx, maintenance) → note and stop. If redirect → follow and note the final URL.
 
 ---
 
-## Étape 2 : Robots.txt & Sitemap
+## Step 1: Homepage metadata collection
+
+Use `web_fetch` on the main URL and extract:
+
+### 1.1 Essential HTML tags
+
+Extract and structure: `<title>`, meta description, H1 (count), H2 list, canonical URL, lang attribute, hreflang tags, viewport meta, Open Graph tags, Twitter Card.
+
+### 1.2 CMS detection
+
+Look for markers in the HTML source: WordPress (`wp-content/`), Shopify (`cdn.shopify.com`), Webflow (`webflow.com`), Wix (`wix.com`), Next.js (`__NEXT_DATA__`), and others.
+
+---
+
+## Step 2: Robots.txt & Sitemap
 
 ### 2.1 Robots.txt
 
-```
-web_fetch: [URL]/robots.txt
-```
-
-Extraire et structurer :
-
-```json
-{
-  "robots_txt": {
-    "exists": true,
-    "raw_content": "[contenu brut — tronqué si > 500 lignes]",
-    "user_agents": {
-      "Googlebot": { "allowed": true, "disallowed_paths": ["/admin/"] },
-      "GPTBot": { "allowed": true, "disallowed_paths": [] },
-      "ChatGPT-User": { "allowed": true, "disallowed_paths": [] },
-      "PerplexityBot": { "allowed": false, "disallowed_paths": ["/ "] },
-      "ClaudeBot": { "allowed": true, "disallowed_paths": [] },
-      "anthropic-ai": { "allowed": true, "disallowed_paths": [] },
-      "Bingbot": { "allowed": true, "disallowed_paths": [] }
-    },
-    "sitemaps_declared": ["https://example.com/sitemap.xml"],
-    "crawl_delay": null
-  }
-}
-```
-
-> **Important** : Pour chaque bot IA, vérifier s'il est explicitement bloqué par un `Disallow: /` ou hérité du `User-agent: *`. Distinguer les deux cas.
+Fetch and parse robots.txt. For each AI bot (Googlebot, GPTBot, ChatGPT-User, PerplexityBot, ClaudeBot, anthropic-ai, Bingbot), determine if explicitly blocked, allowed, or inheriting from `User-agent: *`.
 
 ### 2.2 Sitemap XML
 
-```
-web_fetch: [URL]/sitemap.xml
-```
+Fetch sitemap.xml. Extract: existence, URL, type (index or urlset), total URL count, sample URLs, last modified date.
 
-Si absent, chercher dans le robots.txt. Extraire :
+---
+
+## Step 3: Core Web Vitals
+
+Search for PageSpeed Insights data via `web_search`. Structure results for LCP, CLS, INP, FCP, TTFB — both mobile and desktop. Note data source and freshness.
+
+If data is not found, estimate based on HTML analysis (page weight, script count, image optimization).
+
+---
+
+## Step 4: HTTPS & Security headers
+
+Analyze HTTP headers via `web_fetch`: HTTPS status, HSTS, Content-Security-Policy, X-Frame-Options, mixed content detection.
+
+---
+
+## Step 5: Schema markup detection
+
+> ⚠️ **CRITICAL LIMITATION**: `web_fetch` cannot detect JavaScript-injected JSON-LD. Flag uncertainty if CMS is detected but no schema found in static HTML.
+
+Search for `<script type="application/ld+json">`, `itemscope`/`itemtype` (Microdata), and `typeof`/`property` (RDFa) in the HTML.
+
+---
+
+## Step 6: Sample pages crawl
+
+Crawl 3-5 additional pages (from sitemap or navigation). For each, collect the same data as Step 1.
+
+---
+
+## Step 7: Ahrefs MCP data *(if connected)*
+
+> This entire step is **skipped** if Ahrefs MCP is not connected. All data points are then marked as `"source": "estimated"` in the output.
+
+### 7.1 Domain authority & backlinks
+
+Query Ahrefs MCP:
+- **Domain Rating**: `domain-rating` endpoint → real DR score
+- **Backlinks stats**: `backlinks-stats` → total backlinks, referring domains, dofollow ratio
+- **Broken backlinks**: `broken-backlinks` → list of broken inbound links (for the Implementer to generate redirects)
 
 ```json
 {
-  "sitemap": {
-    "exists": true,
-    "url": "https://example.com/sitemap.xml",
-    "type": "index|urlset",
-    "total_urls": 342,
-    "sample_urls": ["[5 premières URLs]"],
-    "last_modified": "2024-01-15",
-    "sub_sitemaps": ["[si sitemap index]"]
+  "ahrefs": {
+    "source": "ahrefs_mcp",
+    "domain_rating": 45,
+    "ahrefs_rank": 123456,
+    "backlinks_total": 12500,
+    "referring_domains": 890,
+    "dofollow_ratio": 0.72,
+    "broken_backlinks": [
+      { "url_from": "https://partner.com/old-link", "url_to": "https://example.com/404-page" }
+    ]
   }
 }
 ```
 
----
+### 7.2 Organic keywords & positions
 
-## Étape 3 : Core Web Vitals
-
-Rechercher les données PageSpeed Insights :
-
-```
-web_search: "PageSpeed Insights [URL]"
-web_search: "[domaine] core web vitals"
-web_search: "[domaine] site speed test"
-```
-
-Structurer les résultats trouvés :
+Query Ahrefs MCP:
+- **Organic keywords**: `organic-keywords` → top 50 keywords the site ranks for with positions and volumes
+- **Top pages**: `top-pages` → pages driving the most organic traffic
 
 ```json
 {
-  "core_web_vitals": {
-    "source": "PageSpeed Insights / estimation web",
-    "mobile": {
-      "performance_score": 72,
-      "lcp": { "value": "2.8s", "rating": "needs_improvement" },
-      "cls": { "value": "0.05", "rating": "good" },
-      "inp": { "value": "180ms", "rating": "good" },
-      "fcp": { "value": "1.6s", "rating": "good" },
-      "ttfb": { "value": "0.9s", "rating": "needs_improvement" }
-    },
-    "desktop": {
-      "performance_score": 89,
-      "lcp": { "value": "1.2s", "rating": "good" },
-      "cls": { "value": "0.02", "rating": "good" },
-      "inp": { "value": "95ms", "rating": "good" },
-      "fcp": { "value": "0.8s", "rating": "good" },
-      "ttfb": { "value": "0.5s", "rating": "good" }
-    },
-    "data_freshness": "estimated",
-    "note": "[si données non trouvées, indiquer clairement]"
+  "ahrefs_keywords": {
+    "total_organic_keywords": 2340,
+    "top_keywords": [
+      { "keyword": "linen curtains", "position": 3, "volume": 8100, "url": "/collections/lin" },
+      { "keyword": "velvet cushions", "position": 7, "volume": 3200, "url": "/collections/coussins-velours" }
+    ],
+    "top_pages": [
+      { "url": "/collections/rideau", "organic_traffic": 4500, "keywords_count": 120 }
+    ]
   }
 }
 ```
 
-> Si les données PageSpeed précises ne sont pas trouvées, chercher via des outils tiers (GTmetrix, WebPageTest) ou estimer à partir du HTML (taille de page, nombre de scripts, images non optimisées).
+### 7.3 Competitors identification
 
----
-
-## Étape 4 : HTTPS & Headers de sécurité
-
-Analyser via `web_fetch` les headers HTTP :
+Query Ahrefs MCP:
+- **Organic competitors**: `organic-competitors` → sites competing for the same keywords
 
 ```json
 {
-  "security": {
-    "https": true,
-    "http_to_https_redirect": true,
-    "hsts": true,
-    "content_security_policy": false,
-    "x_frame_options": "SAMEORIGIN",
-    "x_content_type_options": "nosniff",
-    "mixed_content_detected": false
-  }
-}
-```
-
----
-
-## Étape 5 : Détection Schema Markup
-
-> ⚠️ **LIMITE CRITIQUE** : `web_fetch` ne peut PAS détecter les données structurées JSON-LD injectées via JavaScript. De nombreux CMS injectent le schema côté client.
-
-### Ce que le Collecteur peut faire :
-1. Chercher `<script type="application/ld+json">` dans le HTML statique
-2. Chercher les attributs `itemscope`, `itemtype` (Microdata)
-3. Chercher les attributs `typeof`, `property` (RDFa)
-
-### Ce qu'il doit signaler :
-- Si aucun schema trouvé ET CMS détecté (WordPress + Yoast/RankMath, Shopify...) → signaler : "Schema probablement injecté côté client — non détectable via web_fetch. Vérifier via Google Rich Results Test."
-
-```json
-{
-  "schema_markup": {
-    "detection_method": "web_fetch HTML statique",
-    "json_ld_found": true,
-    "json_ld_types": ["Organization", "LocalBusiness", "FAQPage"],
-    "microdata_found": false,
-    "rdfa_found": false,
-    "reliability": "high|medium|low",
-    "note": "[avertissement si CMS détecté mais aucun schema trouvé]"
-  }
-}
-```
-
----
-
-## Étape 6 : Pages secondaires (sample crawl)
-
-Crawler 3-5 pages supplémentaires en se basant sur :
-- Le sitemap (si disponible)
-- Les liens de navigation principale
-- Les types de pages clés (page service, article blog, fiche produit, page contact)
-
-Pour chaque page, collecter les mêmes données que l'étape 1 (title, meta, H1, H2).
-
-```json
-{
-  "pages_sample": [
-    {
-      "url": "https://example.com/services",
-      "type": "service",
-      "title": "...",
-      "title_length": 48,
-      "meta_description": "...",
-      "meta_description_length": 0,
-      "h1": "...",
-      "h1_count": 1,
-      "issues": ["meta_description_missing"]
-    }
+  "ahrefs_competitors": [
+    { "domain": "laredoute.fr", "common_keywords": 450, "competition_level": "high" },
+    { "domain": "maison-monde.com", "common_keywords": 280, "competition_level": "medium" }
   ]
 }
 ```
 
----
+> This replaces the manual "identify competitors via web_search" step. The auditor can use these directly.
 
-## Étape 7 : Indexation & Présence externe
+### 7.4 Brand Radar — AI visibility *(if available on user's plan)*
 
-### 7.1 Indexation Google
-```
-web_search: "site:[domaine]"
-```
-Estimer le nombre de pages indexées.
-
-### 7.2 Indexation Bing
-```
-web_search: "site:[domaine] bing"
-```
-
-### 7.3 Indexation Brave
-```
-web_search: "[domaine] brave search index"
-```
-
-### 7.4 Présence dans les annuaires (mode Local)
-```
-web_search: "[nom entreprise] [ville] pages jaunes"
-web_search: "[nom entreprise] [ville] yelp OR tripadvisor OR doctolib"
-```
+Query Ahrefs MCP:
+- **Brand Radar**: `brand-radar` → brand mentions across AI agents
 
 ```json
 {
-  "indexation": {
-    "google_pages_indexed": "~340",
-    "bing_indexed": true,
-    "brave_indexed": true,
-    "external_listings": {
-      "pages_jaunes": true,
-      "yelp": false,
-      "tripadvisor": false,
-      "doctolib": false,
-      "other": []
-    }
+  "ahrefs_brand_radar": {
+    "source": "ahrefs_mcp",
+    "ai_mentions": {
+      "chatgpt": { "mentioned": true, "citation_count": 5 },
+      "perplexity": { "mentioned": true, "citation_count": 3 },
+      "google_ai_overview": { "mentioned": false },
+      "claude": { "mentioned": true, "citation_count": 1 }
+    },
+    "real_prompts_with_citations": [
+      { "platform": "chatgpt", "prompt": "best linen curtains France", "cited": true }
+    ]
   }
 }
 ```
 
+> This is a **direct replacement for the manual GEO visibility test** (Step 5.6 in the auditor). Real data instead of manual searches.
+
 ---
 
-## Étape 8 : Assemblage du site-data.json
+## Step 8: Indexation & external presence
 
-Assembler toutes les données collectées dans un fichier JSON unique :
+### 8.1 Google indexation
+`web_search: "site:[domain]"` — estimate indexed page count.
+
+### 8.2 Bing indexation
+`web_search: "[domain] bing indexed"` — verify presence.
+
+### 8.3 Brave Search indexation
+`web_search: "[domain] brave search"` — verify presence (critical for Claude citations).
+
+### 8.4 Local directories (Local mode)
+Search for business on key directories (Yelp, TripAdvisor, Healthgrades, etc.).
+
+---
+
+## Step 9: Assemble site-data.json
+
+Assemble all collected data into a single structured JSON file:
 
 ```json
 {
   "metadata": {
-    "collector_version": "1.0",
+    "collector_version": "2.0",
     "collection_date": "[ISO 8601]",
     "url_audited": "[URL]",
-    "url_final": "[URL après redirections]",
-    "domain": "[domaine extrait]",
-    "collection_duration": "[temps estimé]",
-    "data_completeness": "high|medium|low"
+    "url_final": "[URL after redirects]",
+    "domain": "[extracted domain]",
+    "data_completeness": "high|medium|low",
+    "mcp_integrations": {
+      "ahrefs": true|false,
+      "ga4": true|false,
+      "gsc": true|false
+    }
   },
   "homepage": { "..." },
+  "cms_detected": "shopify|wordpress|...",
   "robots_txt": { "..." },
   "sitemap": { "..." },
   "core_web_vitals": { "..." },
@@ -344,76 +275,86 @@ Assembler toutes les données collectées dans un fichier JSON unique :
   "schema_markup": { "..." },
   "pages_sample": [ "..." ],
   "indexation": { "..." },
-  "cms_detected": "wordpress",
+  "ahrefs": { "..." },
+  "ahrefs_keywords": { "..." },
+  "ahrefs_competitors": [ "..." ],
+  "ahrefs_brand_radar": { "..." },
   "issues_summary": {
-    "critical": ["[liste des problèmes critiques détectés]"],
-    "warnings": ["[liste des avertissements]"],
-    "info": ["[notes informatives]"]
+    "critical": ["[list]"],
+    "warnings": ["[list]"],
+    "info": ["[list]"]
   }
 }
 ```
 
-### Écriture du fichier
+Save to `seo-project-[domain]/site-data.json`.
 
-Sauvegarder dans le répertoire de travail :
-```
-seo-project-[domaine]/site-data.json
-```
-
-Si un `client-profile.md` n'existe pas encore, en créer un pré-rempli avec les informations détectées (CMS, langue, type de site estimé).
+If no `client-profile.md` exists, create a pre-filled one with detected information.
 
 ---
 
-## Étape 9 : Résumé pour l'utilisateur
+## Step 10: Summary for the user
 
-Après la collecte, présenter un résumé clair :
+After collection, present a clear summary:
 
 ```
-═══════════════════════════════════════
-COLLECTE SEO TERMINÉE — [domaine]
-Date : [date]
-═══════════════════════════════════════
+═══════════════════════════════════════════
+SEO DATA COLLECTION COMPLETE — [domain]
+Date: [date]
+═══════════════════════════════════════════
 
-📊 Données collectées :
-   ✅ Homepage : title, meta, H1, OG tags
-   ✅ Robots.txt : [X] bots IA autorisés / [Y] bloqués
-   ✅ Sitemap : [N] URLs trouvées
-   ✅ Core Web Vitals : [source]
-   ✅ Sécurité : HTTPS [oui/non]
-   ✅ Schema : [types trouvés]
-   ✅ Sample : [N] pages analysées
-   ✅ Indexation : ~[N] pages Google
+📊 Data collected:
+   ✅ Homepage: title, meta, H1, OG tags
+   ✅ Robots.txt: [X] AI bots allowed / [Y] blocked
+   ✅ Sitemap: [N] URLs found
+   ✅ Core Web Vitals: [source]
+   ✅ Security: HTTPS [yes/no]
+   ✅ Schema: [types found or "check needed"]
+   ✅ Sample: [N] pages analyzed
+   ✅ Indexation: ~[N] pages on Google
 
-⚠️ Problèmes détectés : [N critique] / [N warning]
-   [Liste des 3 problèmes les plus importants]
+[If Ahrefs MCP connected:]
+   ✅ Ahrefs DR: [score]/100 | Referring domains: [N]
+   ✅ Organic keywords: [N] tracked | Top position: [N]
+   ✅ Competitors: [N] identified
+   ✅ Brand Radar: cited by [N] AI platforms
 
-📁 Fichier généré : site-data.json
-   → Prêt pour le skill seo-geo-audit
+[If Ahrefs MCP NOT connected:]
+   ℹ️ Backlinks & keywords: estimated (connect Ahrefs MCP for real data)
 
-Souhaitez-vous lancer l'audit complet maintenant ?
+⚠️ Issues detected: [N critical] / [N warning]
+   [Top 3 most important issues]
+
+📁 File generated: site-data.json
+   → Ready for seo-geo-audit
+
+Would you like to run the full audit now?
 ```
 
 ---
 
-## Gestion des erreurs
+## Error handling
 
 | Situation | Action |
 |---|---|
-| Site inaccessible (timeout) | Réessayer après 5s. Si échec → noter et arrêter. |
-| Robots.txt absent | Noter `exists: false`, continuer. |
-| Sitemap absent | Chercher dans robots.txt, sinon noter `exists: false`. |
-| PageSpeed non trouvé | Estimer via l'analyse HTML, noter `source: "estimation"`. |
-| Page 403/401 | Noter, continuer avec les autres pages. |
-| Rate limiting détecté | Espacer les requêtes, noter dans le rapport. |
+| Site inaccessible (timeout) | Retry after 5s. If still down → note and stop. |
+| Robots.txt missing | Note `exists: false`, continue. |
+| Sitemap missing | Check robots.txt for sitemap URL, otherwise note `exists: false`. |
+| PageSpeed not found | Estimate via HTML analysis, note `source: "estimation"`. |
+| Page 403/401 | Note, continue with other pages. |
+| Rate limiting detected | Space out requests, note in report. |
+| Ahrefs MCP timeout | Note the failure, continue without Ahrefs data. Flag in output. |
+| Ahrefs MCP not connected | Skip Step 7 entirely, all metrics marked `"source": "estimated"`. |
 
 ---
 
-## Chaînage avec le skill suivant
+## Pipeline chaining
 
-Le fichier `site-data.json` est conçu pour être lu directement par le skill `seo-geo-audit`. Quand l'utilisateur demande de lancer l'audit après la collecte :
+The `site-data.json` file is designed to be read directly by `seo-geo-audit`. When the user asks to run the audit after collection:
 
-1. Vérifier que `site-data.json` existe
-2. Le passer en contexte au skill seo-geo-audit
-3. Le skill d'audit peut sauter l'Étape 0 (collecte manuelle) et aller directement à l'analyse
+1. Verify `site-data.json` exists
+2. Pass it in context to the audit skill
+3. The audit skill skips Step 0 (manual collection) and goes directly to analysis
+4. If Ahrefs data is present, the auditor uses real metrics instead of estimates
 
-> **Pattern 2 appliqué** : Output-as-input chaining. Le collecteur écrit un JSON structuré, l'auditeur le lit. Couplage faible, format partagé comme couche API.
+> **Pattern 2 applied**: Output-as-input chaining. The collector writes structured JSON, the auditor reads it. Loose coupling, shared files as the API layer.

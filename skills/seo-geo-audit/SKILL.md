@@ -43,6 +43,21 @@ Check for these files in the project folder `seo-project-[domain]/`:
 
 3. **Neither file exists** — Run as standalone: ask all questions below.
 
+### Ahrefs MCP data (if available in site-data.json)
+
+When `site-data.json` contains Ahrefs data (`mcp_integrations.ahrefs: true`), use real metrics throughout the audit:
+
+| Audit section | Without Ahrefs | With Ahrefs MCP |
+|---|---|---|
+| **Step 2B.2 Authority & Link Building** | Estimate referring domains via web search | Real DR, backlink count, referring domains, anchor profile |
+| **Step 2B.3 Organic Rankings** | Manual keyword search (5-10 queries) | Real keyword positions + volumes for 50+ keywords |
+| **Step 3.2 Authority & Trust** | Estimate press mentions | Real brand mention data |
+| **Step 5.5 Platform Optimization** | Estimate domain authority metrics | Real Ahrefs DR + rank |
+| **Step 5.6 AI Visibility Test** | Manual searches on each AI platform | Brand Radar: real citation data across AI agents |
+| **Step 7 Competitive Analysis** | Identify competitors via web_search | Pre-identified organic competitors with common keyword counts |
+
+When Ahrefs data is present, always note `Source: Ahrefs MCP (real data)` in the report. When estimated, note `Source: web search (estimate)`.
+
 ### Manual information gathering (standalone mode)
 
 Ask the user:

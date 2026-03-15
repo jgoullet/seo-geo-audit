@@ -136,21 +136,27 @@ Automated technical crawler. Run it on any URL and it produces a structured `sit
 - HTTPS and security headers
 - Google/Bing/Brave indexation estimates
 
-**Trigger**: "collecte les données SEO de [url]", "crawl ce site", "prépare les données pour l'audit"
+**Optional: Ahrefs MCP integration** — Connect your Ahrefs account (Lite plan+) for real Domain Rating, backlink data, organic keywords with positions, competitor identification, and Brand Radar (AI citation tracking across ChatGPT, Perplexity, Claude). Without Ahrefs, all metrics are estimated.
+
+**Trigger**: "collect SEO data for [url]", "crawl this site", "get backlink data for [url]"
 
 ### seo-geo-audit
 
-The original expert audit skill — now enhanced to read `site-data.json` when available, skipping manual data collection. Produces a scored report /90 across 7 dimensions with competitive analysis and prioritized action plan.
+The expert audit skill — reads `site-data.json` when available (including Ahrefs data), skipping manual data collection. Produces a scored report /90 across 7 dimensions with competitive analysis and prioritized action plan.
 
-**Trigger**: "audit SEO de [url]", "audite mon site", "compare mon site à [concurrent]"
+**Trigger**: "audit [url]", "audit my site", "compare my site to [competitor]"
 
 ### seo-implementer
 
-*(Coming in v2.1)* Reads the audit report and generates ready-to-deploy fix files: rewritten meta tags, JSON-LD schema blocks, .htaccess redirects, robots.txt corrections, and an implementation checklist.
+Reads the audit report and generates ready-to-deploy fix files: rewritten meta tags, JSON-LD schema blocks, redirect rules (Apache/Nginx/Vercel/Shopify), robots.txt corrections, content optimization snippets, and a step-by-step implementation checklist.
+
+**Trigger**: "generate the fixes", "implement the recommendations", "create the schema markup"
 
 ### seo-monitor
 
-*(Coming in v2.2)* Periodic re-crawl that compares current state against the baseline from the first audit. Produces a delta report showing improvements, regressions, and alerts.
+Periodic re-crawl that compares current state against the baseline from the first audit. Produces a delta report showing improvements, regressions, and alerts. If Ahrefs MCP is connected, tracks Domain Rating evolution, backlink changes, and AI citation trends over time via Brand Radar.
+
+**Trigger**: "monitor my SEO", "check if fixes worked", "has my SEO improved"
 
 ---
 

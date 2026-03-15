@@ -101,6 +101,21 @@ Focused on the metrics most likely to change:
 | Sample pages (3-5) | `web_fetch` key pages | Detect meta tag changes |
 | AI bot access | Parse robots.txt for each bot | Detect GEO improvements |
 
+#### Ahrefs MCP data points *(if connected)*
+
+If Ahrefs MCP was used in the baseline collection, re-query the same endpoints for delta comparison:
+
+| Ahrefs data point | Endpoint | What to compare |
+|---|---|---|
+| Domain Rating | `domain-rating` | DR change since baseline (gaining/losing authority?) |
+| Referring domains | `backlinks-stats` | New referring domains acquired? Lost any? |
+| Broken backlinks | `broken-backlinks` | Were broken links fixed? New ones appeared? |
+| Organic keywords | `organic-keywords` | Keyword position changes, new rankings gained |
+| Top pages traffic | `top-pages` | Traffic shifts on key pages |
+| Brand Radar | `brand-radar` | AI citation changes (new mentions? lost mentions?) |
+
+> **Brand Radar delta is critical for GEO monitoring**: if the baseline showed 3 AI citations and the current scan shows 5, that's a direct measure of GEO improvement. If it dropped, investigate why (content freshness? bot access changed?).
+
 ### 1.2 Full re-scan (on request)
 
 Runs the complete `seo-collector` methodology. Use when the user requests a comprehensive re-audit or when significant changes are expected.

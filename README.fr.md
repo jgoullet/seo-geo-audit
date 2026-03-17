@@ -1,141 +1,191 @@
-# 🔍 seo-geo-audit — Skill d'Audit SEO + GEO Expert
+# 🔍 seo-geo-audit — Système d'Audit SEO + GEO Expert
 
 [🇬🇧 English](./README.md) · [🇫🇷 Français](./README.fr.md)
 
-> **Audit SEO expert (Local ou Général) + GEO (Generative Engine Optimization)**  
-> Rapport scoré /90 · Analyse concurrentielle · Visibilité IA · Plan d'action priorisé avec ROI estimé  
-> Rapports générés en **anglais par défaut** · Français disponible sur demande
+> **D'un skill isolé à un pipeline SEO autonome.**
+> 5 skills connectés qui collectent, auditent, implémentent et surveillent — vous validez les résultats au lieu d'orchestrer les étapes.
+> Rapports en **anglais par défaut** · Français disponible sur demande
 
 ---
 
 ## ⚡ Installation
 
 ```bash
-# Claude Code
-npx skills add https://github.com/jgoullet/seo-geo-audit --skill seo-geo-audit
+# Système complet (5 skills)
+curl -fsSL https://raw.githubusercontent.com/jgoullet/seo-geo-audit/main/install.sh | bash
 
-# OpenAI Codex CLI
-npx skills add https://github.com/jgoullet/seo-geo-audit --skill seo-geo-audit
+# Un skill spécifique
+curl -fsSL https://raw.githubusercontent.com/jgoullet/seo-geo-audit/main/install.sh | bash -s -- --skill seo-collector
+
+# Audit seul (comportement v1)
+curl -fsSL https://raw.githubusercontent.com/jgoullet/seo-geo-audit/main/install.sh | bash -s -- --audit-only
 ```
 
-Pour **Claude.ai** : télécharger le fichier `.skill` depuis les Releases et l'installer via Paramètres > Skills.
+Pour **Claude.ai** : télécharger les fichiers `.skill` depuis les [Releases](https://github.com/jgoullet/seo-geo-audit/releases) et les installer via Paramètres > Skills.
 
 ---
 
-## Ce que ça fait
+## Quoi de neuf en v2.1
 
-Ce skill transforme Claude en **consultant SEO senior** capable de produire un audit complet et scoré de n'importe quel site web — qu'il s'agisse d'un commerce local ou d'une marque nationale.
-
-### Deux modes d'audit
-
-| Mode | Pour qui ? | Couverture |
+| | v1 (standalone) | v2.1 (système) |
 |---|---|---|
-| 🏘️ **Local** | Restaurant, artisan, médecin, agence locale... | SEO Technique + Core Web Vitals + SEO Local + E-E-A-T + Entity SEO + GEO + UX |
-| 🌐 **Général** | E-commerce, SaaS, blog, média, B2B/B2C... | SEO Technique + Core Web Vitals + Contenu & Autorité + E-E-A-T + Entity SEO + GEO + UX |
+| **Collecte de données** | Manuelle (15 questions) | Crawler automatique + Ahrefs MCP |
+| **Audit** | Estimations uniquement | Données réelles si MCP connecté |
+| **Tracking analytics** | Non couvert | Détecte 11 outils, score de maturité |
+| **Implémentation** | À vous de trouver | Fichiers de correction prêts à déployer |
+| **Monitoring** | Revenez dans 3 mois | Rapports delta automatiques + tendances Ahrefs |
+| **Contexte** | Réinitialisé à chaque session | Profil client partagé |
+| **Langue** | Français uniquement | Anglais par défaut (toute langue sur demande) |
 
-### Décomposition du score — /90 au total
+---
+
+## Le système — comment les skills se connectent
+
+```
+┌─────────────────────────────────────────────┐
+│         seo-shared-context                  │
+│   client-profile.md · seo-standards.md      │
+│   report-conventions.md                     │
+│         (chargé par tous les skills)        │
+└──────────────────┬──────────────────────────┘
+                   │
+    ┌──────────────▼──────────────┐
+    │      seo-collector          │
+    │  Crawl automatique du site  │──→ site-data.json
+    └──────────────┬──────────────┘
+                   │
+    ┌──────────────▼──────────────┐
+    │      seo-geo-audit          │
+    │  Audit expert, scores /90   │──→ audit-report.md + audit-actions.json
+    └──────────────┬──────────────┘
+                   │
+    ┌──────────────▼──────────────┐
+    │      seo-implementer        │
+    │  Génère les corrections     │──→ fixes/ (meta, schema, redirects, analytics)
+    └──────────────┬──────────────┘
+                   │
+    ┌──────────────▼──────────────┐
+    │      seo-monitor            │
+    │  Re-crawl + rapport delta   │──→ monitoring/ (baseline, delta, alertes)
+    └──────────────┘
+         ↻ boucle vers le collecteur
+```
+
+---
+
+## Référence des skills
+
+### seo-shared-context
+
+Couche de données partagées. Contient le template de profil client, le référentiel SEO (seuils Core Web Vitals avec définitions claires, critères E-E-A-T, pourcentages de boost GEO), et les conventions de rapport.
+
+### seo-collector
+
+Crawler technique automatisé. Produit un `site-data.json` structuré avec :
+- Balises HTML (title, meta, H1, OG tags) pour la page d'accueil + 3-5 pages échantillons
+- Analyse `robots.txt` avec vérification d'accès des bots IA
+- Détection sitemap et comptage d'URLs
+- Core Web Vitals (via PageSpeed Insights)
+- Détection schema markup (avec avertissement injection JS)
+- Audit analytics & tracking : détecte 11 outils (GA4, GTM, Meta Pixel, Hotjar/Clarity, Segment, Mixpanel...), vérifie les événements de conversion, consent management, attribue un niveau de maturité
+- HTTPS et en-têtes de sécurité
+- Estimations d'indexation Google/Bing/Brave
+
+**Optionnel : Ahrefs MCP** — Connectez votre compte Ahrefs (plan Lite+) pour obtenir le Domain Rating réel, les données de backlinks, les mots-clés organiques avec positions, l'identification de concurrents, et Brand Radar (suivi des citations IA).
+
+### seo-geo-audit
+
+Le skill d'audit expert — lit `site-data.json` quand disponible (y compris les données Ahrefs et analytics), sautant la collecte manuelle. Produit un rapport scoré /90 sur 7 dimensions avec analyse concurrentielle et plan d'action priorisé. Inclut désormais le scoring de maturité analytics dans la section UX & Conversion.
+
+### seo-implementer
+
+Lit les résultats de l'audit et génère des fichiers prêts à déployer : meta tags réécrites, blocs JSON-LD, règles de redirection (Apache/Nginx/Vercel/Shopify), corrections robots.txt, snippets de contenu optimisé, recommandations de setup analytics (adaptées au CMS et type de site), et une checklist d'implémentation étape par étape avec tests de vérification.
+
+### seo-monitor
+
+Re-crawl périodique qui compare l'état actuel avec le baseline du premier audit. Produit un rapport delta montrant les améliorations, régressions et alertes. Si Ahrefs MCP est connecté, suit l'évolution du Domain Rating, les changements de backlinks, et les tendances de citation IA via Brand Radar.
+
+---
+
+## Intégrations MCP (toutes optionnelles)
+
+Le système fonctionne sans aucun MCP. Chaque intégration remplace les estimations par des données réelles :
+
+| MCP | Ce qu'il ajoute | Plan minimum | Configuration |
+|---|---|---|---|
+| **[Ahrefs](https://ahrefs.com/mcp/)** | Domain Rating, backlinks, mots-clés organiques, concurrents, Brand Radar (citations IA) | Lite ($29/mois) | Connecter via Ahrefs MCP dans les paramètres Claude |
+| **[GA4](https://github.com/googleanalytics/google-analytics-mcp)** | Trafic organique réel, taux de rebond, conversions | Gratuit | Connecter le serveur MCP GA4 |
+| **[GSC](https://github.com/ahonn/mcp-server-gsc)** | Positions réelles, impressions AI Overviews, quick wins | Gratuit | Connecter le serveur MCP GSC |
+
+---
+
+## Décomposition du score — /90 au total
 
 | Dimension | Max | Ce qui est évalué |
 |---|---|---|
-| SEO Technique | /10 | Title, meta robots, H1, URLs, HTTPS, en-têtes de sécurité, sitemap, robots.txt, canonicals, redirections |
-| Core Web Vitals | /10 | LCP, CLS, INP, FCP, TTFB — mobile vs desktop |
+| SEO Technique | /10 | Title, meta, H1, URLs, HTTPS, sitemap, robots.txt, canonicals, redirections |
+| Core Web Vitals | /10 | LCP (vitesse de chargement), CLS (stabilité visuelle), INP (réactivité) — mobile vs desktop |
 | SEO Local ou Contenu & Autorité | /20 | GBP, NAP, Local Pack / Topical authority, backlinks, positionnement |
 | E-E-A-T | /10 | Expérience, Expertise, Autorité, Confiance |
 | Entity SEO | /10 | Knowledge Panel, Wikidata, cohérence d'entité, schema `sameAs` |
-| GEO | /20 | Méthodes Princeton, bots IA, signaux par plateforme, tests de citation IA, suivi AI Overviews |
-| UX & Conversion | /10 | Navigation, CTAs, signaux de confiance, tracking analytics, signaux sociaux, cohérence SERP → landing |
-
----
-
-## Ce qu'il y a dedans
-
-### 📊 Rapport scoré expert
-Chaque dimension reçoit un score chiffré avec justification. Plus de recommandations vagues — le client voit exactement où il en est et pourquoi.
-
-### 🤖 GEO — Generative Engine Optimization
-Basé sur la **recherche Princeton/KDD 2024** (arXiv:2311.09735), le skill évalue :
-- Les **9 méthodes GEO** avec leurs boosts de visibilité mesurés (+40% citations, +37% statistiques...)
-- **L'accès des bots IA** dans `robots.txt` (GPTBot, PerplexityBot, ClaudeBot, anthropic-ai, Bingbot...)
-- **Check Cloudflare WAF** : les règles Cloudflare par défaut peuvent bloquer silencieusement les bots IA même si `robots.txt` les autorise — un bloqueur GEO invisible très courant
-- Les signaux de ranking spécifiques à **ChatGPT, Perplexity, Google AI Overview, Copilot et Claude**
-- À noter : Claude utilise **Brave Search** (pas Google/Bing) — un détail critique souvent manqué
-- **Détection query fan-out** : regex GSC pour identifier les requêtes longue traîne conversationnelles générées par la décomposition en sous-queries des IA — avec ou sans GSC MCP
-- **Brand mentions vs backlinks** (Ahrefs déc. 2025, 75K marques) : les mentions de marque corrèlent 3× plus avec les citations IA que les backlinks — les mentions YouTube montrent la corrélation la plus forte sur toutes les plateformes IA
-
-### 🏘️ SEO Local approfondi
-- Audit complet Google Business Profile (12 critères)
-- Cohérence NAP sur tous les annuaires
-- Positionnement Local Pack
-- Validation du schema LocalBusiness
-- **Analyse de vélocité des avis** : comparatif avis/mois vs concurrents + objectif mensuel pour rattraper le leader
-- **Templates de réponse aux avis** : 12 modèles prêts à l'emploi (4 types × 3 variations) avec intégration naturelle de mots-clés service + ville
-
-### 🎯 E-E-A-T & Entity SEO
-- Credentials auteurs, conformité YMYL, signaux de confiance
-- Google Knowledge Panel, identifiant Wikidata, schema `Organization` + `sameAs`
-
-### ⚠️ Garde-fou détection schema
-`web_fetch` ne peut pas détecter le JSON-LD injecté par JavaScript (Yoast, RankMath, AIOSEO...). Le skill signale cette limitation et redirige vers **Google Rich Results Test** pour éviter les faux négatifs.
-
-### ☁️ Cloudflare Browser Rendering *(optionnel)*
-Si vous avez un compte Cloudflare, fournissez votre token API + Account ID pour débloquer :
-- **CF-A — Audit schema JS-rendu** : crawl des pages clés dans un navigateur headless, détecte tout le JSON-LD y compris celui injecté par JS (Yoast, RankMath, Shopify...)
-- **CF-B — Crawl complet du site** : audit automatique de 100+ pages — thin content, pages orphelines, titres/H1 manquants, couverture schema, profondeur de crawl
-
-
-### 📊 Intégrations MCP GA4 + GSC *(optionnelles)*
-Connectez les serveurs MCP officiels pour remplacer les estimations par des données réelles :
-- **GA4 MCP** (`github.com/googleanalytics/google-analytics-mcp`) → trafic organique réel, taux de rebond, conversions, trafic social
-- **GSC MCP** (`github.com/ahonn/mcp-server-gsc`) → positions réelles, impressions AI Overviews, quick wins, inspection d'URL, cannibalisation
-
-Sans MCP : toutes les métriques sont estimées à partir de signaux observables (clairement indiqué dans le rapport).
-
-### 📝 Détection écriture IA
-Lors de l'audit du contenu, le skill repère les marqueurs d'écriture IA (em dashes, "leverage", "robust", "in today's digital age"...) comme signaux E-E-A-T négatifs. Inclut une référence complète avec alternatives.
-
-### 🏆 Analyse concurrentielle
-Tableau comparatif côte à côte contre jusqu'à 3 concurrents sur les 7 dimensions.
-
-### 📋 Plan d'action priorisé avec ROI
-- 🟢 Quick wins (< 1 semaine)
-- 🟡 Moyen terme (1–3 mois)
-- 🔴 Long terme (3–6 mois)
-
-Chaque action inclut : estimation d'effort, impact trafic/leads, ressources nécessaires.
+| GEO | /20 | Méthodes Princeton, bots IA, signaux par plateforme, tests de citation IA |
+| UX & Conversion | /10 | Navigation, CTAs, signaux de confiance, maturité analytics, cohérence SERP → landing |
 
 ---
 
 ## Exemples d'utilisation
 
+### Pipeline complet
+
 ```
-Audite mon site https://monsite.fr en mode Local.
+"Collecte les données SEO de https://example.com"
+→ Le Collecteur crawl, produit site-data.json (+ données Ahrefs si connecté)
+
+"Lance l'audit SEO-GEO complet"
+→ L'Auditeur lit site-data.json, produit le rapport scoré /90
+
+"Génère les corrections"
+→ L'Implémenteur lit les résultats, produit les fichiers de correction + setup analytics
+
+"Lance le monitoring"
+→ Le Moniteur re-crawl, compare au baseline, alerte si régression
+```
+
+### Audit standalone (fonctionne toujours)
+
+```
+"Audite https://monsite.fr en mode Local.
 Je suis plombier à Lyon.
-Mes concurrents : plombier-lyon1.fr et plombier-express-lyon.fr
-Objectif : apparaître dans le Local Pack Google
+Concurrents : plombier-lyon1.fr et plombier-express-lyon.fr
+Objectif : apparaître dans le Local Pack"
 ```
-
-```
-Fais un audit SEO complet de https://ma-boutique.com
-Mode Général — e-commerce mode & accessoires
-Concurrents : asos.fr, zalando.fr
-J'ai accès à Google Search Console
-```
-
-Le skill collecte les informations manquantes, lance l'audit complet via web search et web fetch, et livre un rapport structuré scoré /90 avec plan d'action priorisé.
 
 ---
 
-## Structure du rapport
+## Structure du repo
 
 ```
-1. RÉSUMÉ EXÉCUTIF         — Score /90, classement vs concurrents, 3 forces/faiblesses
-2. TABLEAU DE BORD         — 7 dimensions avec indicateurs 🔴/🟡/🟢
-3. RÉSULTATS DÉTAILLÉS     — Score + justification + sources par dimension
-4. ANALYSE CONCURRENTIELLE — Tableau comparatif + keyword gap (top 10 cibles)
-5. PLAN D'ACTION + ROI     — Quick wins / Moyen terme / Long terme avec impact estimé
-6. MÉTRIQUES DE SUIVI      — KPIs à tracker + alertes à configurer
-7. GLOSSAIRE               — Termes techniques expliqués pour les non-spécialistes
-8. CONCLUSION              — Synthèse en 3 phrases + recommandation de re-audit
+seo-geo-audit/
+├── install.sh                          # Installeur système
+├── uninstall.sh                        # Désinstalleur
+├── README.md                           # Documentation anglaise 🇬🇧
+├── README.fr.md                        # Ce fichier 🇫🇷
+├── LICENSE
+└── skills/
+    ├── seo-shared-context/
+    │   ├── SKILL.md                    # Couche de données partagées
+    │   └── references/
+    │       ├── seo-standards.md        # Seuils & métriques (avec définitions CWV)
+    │       └── report-conventions.md   # Règles de formatage des rapports
+    ├── seo-collector/
+    │   └── SKILL.md                    # Crawler automatisé + Ahrefs MCP + audit analytics
+    ├── seo-geo-audit/
+    │   ├── SKILL.md                    # Audit expert /90
+    │   └── ai-writing-detection.md     # Référence marqueurs écriture IA
+    ├── seo-implementer/
+    │   └── SKILL.md                    # Générateur de corrections + setup analytics
+    └── seo-monitor/
+        └── SKILL.md                    # Monitoring delta + Brand Radar
 ```
 
 ---
@@ -153,36 +203,14 @@ Le skill collecte les informations manquantes, lance l'audit complet via web sea
 
 ---
 
-## Compatible avec
-
-![Claude Code](https://img.shields.io/badge/Claude_Code-✓-8B5CF6?style=flat-square)
-![Claude.ai](https://img.shields.io/badge/Claude.ai-✓-8B5CF6?style=flat-square)
-![OpenAI Codex CLI](https://img.shields.io/badge/Codex_CLI-✓-10B981?style=flat-square)
-
----
-
-## Fichiers
-
-```
-seo-geo-audit/
-├── SKILL.md                  # Skill principal — framework d'audit complet
-├── ai-writing-detection.md   # Référence — marqueurs d'écriture IA à éviter
-├── README.md                 # Documentation en anglais 🇬🇧
-└── README.fr.md              # Documentation en français 🇫🇷
-```
-
----
-
 ## Sources & méthodologie
 
-- **Méthodes GEO** : Princeton University / IIT Delhi / Georgia Tech / Allen Institute for AI — *"GEO: Generative Engine Optimization"*, KDD 2024 ([arXiv:2311.09735](https://arxiv.org/abs/2311.09735))
-- **Algorithmes plateformes** : Étude SE Ranking (129K domaines), analyse architecture Perplexity Sonar, Google Search Quality Rater Guidelines
-- **Détection écriture IA** : Grammarly, Microsoft 365 Life Hacks, GPTHuman, Textero (2025)
-- **Checklist SEO technique** : Inspiré par [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) (meta robots, en-têtes de sécurité, structure URL)
-- **Cloudflare Browser Rendering** : [Documentation endpoint /crawl](https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/) (bêta ouverte, mars 2026)
-- **GA4 MCP** : [google-analytics-mcp](https://github.com/googleanalytics/google-analytics-mcp) — serveur MCP officiel Google Analytics
-- **GSC MCP** : [mcp-server-gsc](https://github.com/ahonn/mcp-server-gsc) — MCP Google Search Console avec détection de quick wins
-- **Validation schema** : Basé sur les limitations connues des parseurs HTML statiques vs Rich Results Test
+- **Méthodes GEO** : Princeton / IIT Delhi / Georgia Tech — *"GEO: Generative Engine Optimization"*, KDD 2024 ([arXiv:2311.09735](https://arxiv.org/abs/2311.09735))
+- **Algorithmes plateformes** : Étude SE Ranking (129K domaines), analyse Perplexity Sonar, Google Quality Rater Guidelines
+- **Ahrefs MCP** : [Documentation Ahrefs MCP](https://ahrefs.com/mcp/) — Brand Radar, Domain Rating, analyse backlinks
+- **GA4 MCP** : [google-analytics-mcp](https://github.com/googleanalytics/google-analytics-mcp) — serveur MCP officiel
+- **GSC MCP** : [mcp-server-gsc](https://github.com/ahonn/mcp-server-gsc) — MCP Google Search Console
+- **Architecture système** : Inspirée des patterns de skill systems (contexte partagé, chaînage output-as-input, orchestration planifiée)
 
 ---
 
@@ -192,4 +220,4 @@ MIT — libre d'utilisation, modification et redistribution.
 
 ---
 
-*Rapport en anglais par défaut · Français disponible sur demande · Compatible Claude Code & Claude.ai*
+*Rapport en anglais par défaut · Français disponible sur demande · Compatible Claude Code, Claude.ai & Codex CLI*

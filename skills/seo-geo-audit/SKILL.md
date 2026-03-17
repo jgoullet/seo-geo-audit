@@ -551,7 +551,31 @@ Perform the following searches and note if the site is cited:
 
 **Conversion subtotal: /10**
 
-**UX & Conversion Score: /20 → scaled to /10 in summary**
+### 6.3 Analytics & Tracking Maturity
+
+> If `site-data.json` contains `analytics_tracking` data (from the collector's Step 5.5), use it directly. Otherwise, check the HTML source manually.
+
+| Criterion | Verification | Points |
+|---|---|---|
+| GA4 or equivalent installed | Modern analytics tool detected and active | /2 |
+| Tag Manager (GTM) | Container present — enables flexible event tracking | /1 |
+| Conversion events configured | E-commerce events (add_to_cart, purchase) or form/CTA tracking detected | /3 |
+| Consent management (CMP) | Cookie banner / GDPR-CCPA compliant consent tool present | /1 |
+| Heatmap / Session recording | Hotjar, Clarity, or equivalent installed (UX insight capability) | /1 |
+| No legacy analytics | Universal Analytics (UA) migrated to GA4 | /1 |
+| dataLayer structured | GTM dataLayer initialized with meaningful data | /1 |
+
+**Analytics & Tracking subtotal: /10**
+
+**Maturity assessment** (from collector data or manual check):
+- 🔴 **No analytics** (0-2 pts): No GA4, no tracking — flying blind
+- 🟡 **Basic** (3-5 pts): GA4 present but minimal event tracking
+- 🟢 **Intermediate** (6-8 pts): GA4 + GTM + conversion events + consent
+- 🟢🟢 **Advanced** (9-10 pts): Full stack with CDP/product analytics + heatmaps
+
+> **Why this matters for SEO**: Google's ranking signals increasingly rely on user engagement metrics (dwell time, scroll depth, click satisfaction). Without proper tracking, you can't measure whether your SEO improvements are actually driving conversions — and you can't prove ROI to stakeholders.
+
+**UX & Conversion Score: /30 → scaled to /10 in summary**
 
 ---
 
@@ -580,9 +604,8 @@ For each competitor (identify automatically if not provided via `web_search: "[b
 | FAQ present | ✅/❌ | | | |
 | Cited by AI engines | ✅/❌ | | | |
 | Mobile speed (LCP) | | | | |
+| Analytics maturity | | | | |
 | Publishing frequency | | | | |
-
-### Comparison Table — General Mode 🌐
 
 | Criterion | My Site | Competitor 1 | Competitor 2 | Competitor 3 |
 |---|---|---|---|---|
@@ -602,8 +625,8 @@ For each competitor (identify automatically if not provided via `web_search: "[b
 | FAQ / AI-friendly content | ✅/❌ | | | |
 | Keyword gap identified | | | | |
 | Mobile speed (LCP) | | | | |
+| Analytics maturity | | | | |
 | Publishing frequency | | | | |
-| Cited by AI engines | ✅/❌ | | | |
 
 ### Qualitative Competitive Analysis
 

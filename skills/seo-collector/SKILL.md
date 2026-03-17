@@ -135,6 +135,96 @@ Search for `<script type="application/ld+json">`, `itemscope`/`itemtype` (Microd
 
 ---
 
+## Step 5.5: Analytics & tracking audit
+
+Analyze the HTML source from the homepage (and sample pages in Step 6) to detect which analytics and tracking tools are installed, and whether basic conversion tracking appears to be configured.
+
+### 5.5.1 Analytics tool detection
+
+Search the HTML for these markers:
+
+| Tool | Detection pattern | What it means |
+|---|---|---|
+| Google Analytics 4 (GA4) | `gtag.js`, `G-XXXXXXX`, `googletagmanager.com/gtag` | Modern analytics — good |
+| Google Tag Manager (GTM) | `googletagmanager.com/gtm.js`, `GTM-XXXXXXX` | Tag container — enables event tracking without code changes |
+| Universal Analytics (UA) | `analytics.js`, `UA-XXXXXXX` | Legacy — deprecated July 2024, should be migrated to GA4 |
+| Facebook/Meta Pixel | `fbq(`, `connect.facebook.net/en_US/fbevents.js` | Ad tracking — indicates paid social activity |
+| Hotjar / Clarity | `hotjar.com`, `clarity.ms` | Heatmaps / session recording — indicates UX focus |
+| Segment | `analytics.segment.com`, `cdn.segment.com` | CDP — indicates mature tracking stack |
+| Mixpanel | `mixpanel.com/track`, `cdn.mxpnl.com` | Product analytics — indicates event-level tracking |
+| Matomo / Piwik | `matomo.js`, `piwik.js` | Privacy-first analytics |
+| Pinterest Tag | `pintrk(`, `s.pinimg.com` | Pinterest ad tracking |
+| TikTok Pixel | `ttq.load`, `analytics.tiktok.com` | TikTok ad tracking |
+| LinkedIn Insight | `snap.licdn.com/li.lms-analytics` | LinkedIn B2B tracking |
+
+### 5.5.2 Conversion tracking signals
+
+Look for indicators that conversion events are configured:
+
+| Signal | What to look for | Status |
+|---|---|---|
+| Enhanced ecommerce | `purchase`, `add_to_cart`, `begin_checkout` in gtag calls or dataLayer pushes | ✅/❌ |
+| Form tracking | Event listeners on `<form>` submit, or GTM form trigger patterns | ✅/❌ |
+| Scroll tracking | `scroll` event in gtag or GTM | ✅/❌ |
+| Click tracking | `click` events on CTAs, outbound links | ✅/❌ |
+| dataLayer present | `window.dataLayer` initialized | ✅/❌ |
+| Consent management | Cookie banner / CMP detected (Cookiebot, OneTrust, Axeptio, Didomi) | ✅/❌ |
+
+### 5.5.3 UTM parameter handling
+
+Check if the site preserves UTM parameters:
+- Are UTMs visible in internal links (leak) or stripped properly?
+- Does the site use consistent UTM naming? (search for `utm_source`, `utm_medium`, `utm_campaign` patterns)
+
+### 5.5.4 Output structure
+
+```json
+{
+  "analytics_tracking": {
+    "tools_detected": {
+      "ga4": { "present": true, "measurement_id": "G-XXXXXXX" },
+      "gtm": { "present": true, "container_id": "GTM-XXXXXXX" },
+      "ua_legacy": { "present": false },
+      "meta_pixel": { "present": true },
+      "hotjar_clarity": { "present": false, "tool": null },
+      "segment": { "present": false },
+      "mixpanel": { "present": false },
+      "other": []
+    },
+    "conversion_tracking": {
+      "ecommerce_events": false,
+      "form_tracking": false,
+      "scroll_tracking": false,
+      "click_tracking": false,
+      "datalayer_present": true,
+      "consent_management": { "present": true, "tool": "Axeptio" }
+    },
+    "utm_handling": {
+      "utm_params_detected_in_links": false,
+      "consistent_naming": "unknown"
+    },
+    "maturity_level": "basic|intermediate|advanced",
+    "issues": [
+      "No ecommerce conversion tracking detected",
+      "No heatmap/session recording tool installed"
+    ],
+    "recommendations": [
+      "Set up GA4 ecommerce events (add_to_cart, purchase)",
+      "Install Hotjar or Clarity for UX insights"
+    ]
+  }
+}
+```
+
+**Maturity levels:**
+- **basic**: GA4 or GTM present but no conversion events detected
+- **intermediate**: GA4 + GTM + some conversion events + consent management
+- **advanced**: Full event tracking + CDP (Segment) or product analytics (Mixpanel) + heatmaps + structured dataLayer
+
+> This data feeds directly into the auditor's **Step 6: UX & Conversion** section, replacing guesswork with detected tracking state.
+
+---
+
 ## Step 6: Sample pages crawl
 
 Crawl 3-5 additional pages (from sitemap or navigation). For each, collect the same data as Step 1.
@@ -273,6 +363,7 @@ Assemble all collected data into a single structured JSON file:
   "core_web_vitals": { "..." },
   "security": { "..." },
   "schema_markup": { "..." },
+  "analytics_tracking": { "..." },
   "pages_sample": [ "..." ],
   "indexation": { "..." },
   "ahrefs": { "..." },
@@ -310,6 +401,7 @@ Date: [date]
    ✅ Core Web Vitals: [source]
    ✅ Security: HTTPS [yes/no]
    ✅ Schema: [types found or "check needed"]
+   ✅ Analytics: [tools detected] | Maturity: [basic/intermediate/advanced]
    ✅ Sample: [N] pages analyzed
    ✅ Indexation: ~[N] pages on Google
 

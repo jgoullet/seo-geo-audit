@@ -11,17 +11,19 @@
 
 ---
 
-## What changed in v2.0
+## What's new in v2.1
 
-v1 was a single audit skill. v2 turns it into a **skill system** (plugin) — multiple skills that share context, pass output between each other, and produce compound results.
+v1 was a single audit skill. v2 turns it into a **skill system** — 5 connected skills that share context, chain outputs, and produce compound results.
 
-| | v1 (standalone) | v2 (system) |
+| | v1 (standalone) | v2.1 (system) |
 |---|---|---|
-| **Data collection** | Manual (15 questions) | Automated crawler |
-| **Audit** | Same skill | Same skill, now reads crawler output |
+| **Data collection** | Manual (15 questions) | Automated crawler + Ahrefs MCP |
+| **Audit** | Estimates only | Real data when MCP connected |
+| **Analytics tracking** | Not covered | Detects 11 tools, scores maturity |
 | **Implementation** | You figure it out | Generated fix files ready to deploy |
-| **Monitoring** | Come back in 3 months | Automatic delta reports |
+| **Monitoring** | Come back in 3 months | Automatic delta reports + Ahrefs trends |
 | **Context** | Reset every session | Shared client profile |
+| **Language** | French only | English by default (any language on request) |
 
 If you just want the audit skill like before, that still works — see [Standalone install](#standalone-install-v1-behavior) below.
 
@@ -133,22 +135,23 @@ Automated technical crawler. Run it on any URL and it produces a structured `sit
 - Sitemap detection and URL count
 - Core Web Vitals (via PageSpeed Insights data)
 - Schema markup detection (with JS-injection caveat)
+- Analytics & tracking audit: detects 11 tools (GA4, GTM, Meta Pixel, Hotjar/Clarity, Segment, Mixpanel...), checks conversion events, consent management, assigns maturity level
 - HTTPS and security headers
 - Google/Bing/Brave indexation estimates
 
-**Optional: Ahrefs MCP integration** — Connect your Ahrefs account (Lite plan+) for real Domain Rating, backlink data, organic keywords with positions, competitor identification, and Brand Radar (AI citation tracking across ChatGPT, Perplexity, Claude). Without Ahrefs, all metrics are estimated.
+**Optional: Ahrefs MCP** — Connect your Ahrefs account (Lite plan+) for real Domain Rating, backlink data, organic keywords with positions, competitor identification, and Brand Radar (AI citation tracking). Without Ahrefs, all metrics are estimated.
 
 **Trigger**: "collect SEO data for [url]", "crawl this site", "get backlink data for [url]"
 
 ### seo-geo-audit
 
-The expert audit skill — reads `site-data.json` when available (including Ahrefs data), skipping manual data collection. Produces a scored report /90 across 7 dimensions with competitive analysis and prioritized action plan.
+The expert audit skill — reads `site-data.json` when available (including Ahrefs and analytics data), skipping manual data collection. Produces a scored report /90 across 7 dimensions with competitive analysis and prioritized action plan. Now includes analytics maturity scoring in the UX & Conversion section.
 
 **Trigger**: "audit [url]", "audit my site", "compare my site to [competitor]"
 
 ### seo-implementer
 
-Reads the audit report and generates ready-to-deploy fix files: rewritten meta tags, JSON-LD schema blocks, redirect rules (Apache/Nginx/Vercel/Shopify), robots.txt corrections, content optimization snippets, and a step-by-step implementation checklist.
+Reads the audit results and generates ready-to-deploy fix files: rewritten meta tags, JSON-LD schema blocks, redirect rules (Apache/Nginx/Vercel/Shopify), robots.txt corrections, content optimization snippets, analytics setup recommendations (adapted to CMS and site type), and a step-by-step implementation checklist with verification tests.
 
 **Trigger**: "generate the fixes", "implement the recommendations", "create the schema markup"
 
@@ -160,22 +163,42 @@ Periodic re-crawl that compares current state against the baseline from the firs
 
 ---
 
+## MCP integrations (all optional)
+
+The system works without any MCP. Each integration replaces estimates with real data:
+
+| MCP | What it adds | Min. plan | Setup |
+|---|---|---|---|
+| **[Ahrefs](https://ahrefs.com/mcp/)** | Domain Rating, backlinks, organic keywords, competitors, Brand Radar (AI citations) | Lite ($29/mo) | Connect via Ahrefs MCP in Claude settings |
+| **[GA4](https://github.com/googleanalytics/google-analytics-mcp)** | Real organic traffic, bounce rates, conversions, social referrals | Free | Connect GA4 MCP server |
+| **[GSC](https://github.com/ahonn/mcp-server-gsc)** | Real rankings, AI Overviews impressions, quick wins, URL inspection | Free | Connect GSC MCP server |
+
+---
+
 ## Example usage
 
 ### Full pipeline
 
 ```
-"Collecte les données SEO de https://example.com"
-→ Collector runs, produces site-data.json
+"Collect SEO data for https://example.com"
+→ Collector runs, produces site-data.json (+ Ahrefs data if connected)
 
-"Lance l'audit SEO-GEO complet"
+"Run the full SEO-GEO audit"
 → Auditor reads site-data.json, produces audit-report.md with scores /90
 
-"Génère les corrections"
-→ Implementer reads audit-report.md, produces fix files
+"Generate the fixes"
+→ Implementer reads audit results, produces fix files + analytics setup
 
-"Lance le monitoring"
-→ Monitor re-crawls, compares with baseline
+"Start monitoring"
+→ Monitor re-crawls, compares with baseline, alerts on regressions
+```
+
+### With Ahrefs MCP connected
+
+```
+"Collect SEO data for https://example.com"
+→ Real DR: 45/100 | 890 referring domains | 2,340 organic keywords
+→ Competitors auto-identified | Brand Radar: cited by 3 AI platforms
 ```
 
 ### Standalone audit (still works)
@@ -238,6 +261,9 @@ curl -fsSL https://raw.githubusercontent.com/jgoullet/seo-geo-audit/main/install
 
 - **GEO methods**: Princeton / IIT Delhi / Georgia Tech — *"GEO: Generative Engine Optimization"*, KDD 2024 (arXiv:2311.09735)
 - **Platform algorithms**: SE Ranking (129K domains), Perplexity Sonar analysis, Google Quality Rater Guidelines
+- **Ahrefs MCP**: [Ahrefs MCP documentation](https://ahrefs.com/mcp/) — Brand Radar, Domain Rating, backlink analysis
+- **GA4 MCP**: [google-analytics-mcp](https://github.com/googleanalytics/google-analytics-mcp) — official Google Analytics MCP server
+- **GSC MCP**: [mcp-server-gsc](https://github.com/ahonn/mcp-server-gsc) — Google Search Console MCP
 - **System architecture**: Inspired by skill system patterns (shared context, output-as-input chaining, scheduled orchestration)
 
 ---

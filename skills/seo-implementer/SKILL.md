@@ -223,6 +223,57 @@ For each page flagged with content issues, generate:
 
 ---
 
+## Step 5.5: Analytics tracking fixes
+
+Read `analytics_tracking` from `site-data.json` (collector Step 5.5) and `fixes_needed.technical` from `audit-actions.json`.
+
+File: `fixes/analytics-setup.md`
+
+Only generate this file if the collector detected tracking issues (maturity level "basic" or missing tools).
+
+```markdown
+# Analytics Tracking Recommendations — [domain]
+
+## Current state
+- Tools detected: [list from site-data.json]
+- Maturity level: [basic/intermediate/advanced]
+- Issues: [list from collector]
+
+## Recommended setup
+
+### Priority 1: GA4 configuration (if missing or misconfigured)
+[GA4 measurement ID setup instructions, adapted to detected CMS]
+
+### Priority 2: Key conversion events to configure
+[Based on site type from client-profile.md:]
+
+#### E-commerce sites:
+- `add_to_cart` — when user adds item to cart
+- `begin_checkout` — when user starts checkout flow
+- `purchase` — when order is completed (with value, currency, items)
+- `view_item` — when user views a product page
+
+#### Lead generation sites:
+- `form_submit` — when contact/quote form is submitted
+- `phone_click` — when phone number is tapped on mobile
+- `cta_click` — when primary CTA is clicked
+
+#### Content/Blog sites:
+- `scroll_depth` — 25%, 50%, 75%, 100% thresholds
+- `article_read` — time on page > 30 seconds
+- `newsletter_signup` — email subscription
+
+### Priority 3: Consent management (if missing)
+[CMP recommendation based on region — Cookiebot/OneTrust for EU/GDPR, generic for US]
+
+### Priority 4: Heatmap/Session recording (if missing)
+[Recommend Microsoft Clarity (free) or Hotjar]
+```
+
+> **CMS-specific**: Adapt GA4 setup instructions to the detected CMS. Shopify has native GA4 integration. WordPress uses plugins (MonsterInsights, GA4WP). Webflow has built-in GA integration. Custom sites need manual gtag.js injection.
+
+---
+
 ## Step 6: Implementation checklist
 
 File: `fixes/implementation-checklist.md`

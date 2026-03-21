@@ -98,6 +98,8 @@ ACCESS & TECHNICAL CONTEXT
 
 Use `web_search` and `web_fetch` to analyze:
 
+> ⚠️ **Token budget**: Always use `text_content_token_limit` on `web_fetch` calls. Use **4000** for primary pages, **3000** for competitor/secondary pages, **1000** for robots.txt. See `seo-collector/SKILL.md` for the full budget table.
+
 ### 1.1 On-Page & Structure
 
 | Criterion | Verification | Points |

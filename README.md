@@ -123,7 +123,7 @@ curl -fsSL https://raw.githubusercontent.com/jgoullet/seo-geo-audit/main/uninsta
 
 ### seo-shared-context
 
-Shared data layer. Contains the client profile template, SEO standards reference (Core Web Vitals thresholds, E-E-A-T criteria, GEO boost percentages), and report formatting conventions.
+Shared data layer. Contains the client profile template, SEO standards reference (Core Web Vitals thresholds, E-E-A-T criteria, GEO boost percentages), report formatting conventions, and GSC regex filters (RE2 patterns for branded/non-branded, intent, local, long-tail query segmentation — loaded only when GSC MCP is connected).
 
 **Not used directly** — loaded automatically by other skills.
 
@@ -138,6 +138,8 @@ Automated technical crawler. Run it on any URL and it produces a structured `sit
 - Analytics & tracking audit: detects 11 tools (GA4, GTM, Meta Pixel, Hotjar/Clarity, Segment, Mixpanel...), checks conversion events, consent management, assigns maturity level
 - HTTPS and security headers
 - Google/Bing/Brave indexation estimates
+
+**Token budget optimization**: All `web_fetch` calls use `text_content_token_limit` to cap page responses (4000 for homepage, 3000 for inner/competitor pages, 1000 for robots.txt). This cuts context window consumption from ~175K to ~75K tokens per audit — leaving room for the full report generation.
 
 **Optional: Ahrefs MCP** — Connect your Ahrefs account (Lite plan+) for real Domain Rating, backlink data, organic keywords with positions, competitor identification, and Brand Radar (AI citation tracking). Without Ahrefs, all metrics are estimated.
 
@@ -225,7 +227,8 @@ seo-geo-audit/
     │   ├── SKILL.md                    # Shared data layer
     │   └── references/
     │       ├── seo-standards.md        # Thresholds & metrics
-    │       └── report-conventions.md   # Report formatting rules
+    │       ├── report-conventions.md   # Report formatting rules
+    │       └── gsc-regex-filters.md    # GSC regex patterns (RE2) for query segmentation
     ├── seo-collector/
     │   └── SKILL.md                    # Automated crawler
     ├── seo-geo-audit/

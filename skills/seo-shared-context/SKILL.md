@@ -65,6 +65,10 @@ Lire le fichier [`references/seo-standards.md`](./references/seo-standards.md) p
 
 Lire le fichier [`references/report-conventions.md`](./references/report-conventions.md) pour le format standardisé des rapports. Assure la cohérence entre le rapport d'audit, le rapport d'implémentation et le rapport de monitoring.
 
+### 4. `gsc-regex-filters.md` — GSC Regex Filters (RE2)
+
+Lire le fichier [`references/gsc-regex-filters.md`](./references/gsc-regex-filters.md) **uniquement quand le GSC MCP est connecté** et que la tâche nécessite une segmentation des requêtes. Contient des patterns regex prêts à l'emploi pour segmenter le trafic par : branded/non-branded, intent (question, transactionnel, local), long-tail conversationnel (query fan-out IA), et requêtes concurrentes. Utilisé par l'Auditeur (scoring) et le Moniteur (delta tracking).
+
 ---
 
 ## Convention de nommage des fichiers de sortie

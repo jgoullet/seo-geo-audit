@@ -77,7 +77,7 @@ Pour **Claude.ai** : télécharger les fichiers `.skill` depuis les [Releases](h
 
 ### seo-shared-context
 
-Couche de données partagées. Contient le template de profil client, le référentiel SEO (seuils Core Web Vitals avec définitions claires, critères E-E-A-T, pourcentages de boost GEO), et les conventions de rapport.
+Couche de données partagées. Contient le template de profil client, le référentiel SEO (seuils Core Web Vitals avec définitions claires, critères E-E-A-T, pourcentages de boost GEO), les conventions de rapport, et les filtres regex GSC (patterns RE2 pour segmentation branded/non-branded, intent, local, long-tail — chargés uniquement quand le GSC MCP est connecté).
 
 ### seo-collector
 
@@ -90,6 +90,8 @@ Crawler technique automatisé. Produit un `site-data.json` structuré avec :
 - Audit analytics & tracking : détecte 11 outils (GA4, GTM, Meta Pixel, Hotjar/Clarity, Segment, Mixpanel...), vérifie les événements de conversion, consent management, attribue un niveau de maturité
 - HTTPS et en-têtes de sécurité
 - Estimations d'indexation Google/Bing/Brave
+
+**Optimisation token budget** : tous les appels `web_fetch` utilisent `text_content_token_limit` pour plafonner les réponses (4000 pour la homepage, 3000 pour les pages internes/concurrents, 1000 pour robots.txt). Réduit la consommation du context window de ~175K à ~75K tokens par audit.
 
 **Optionnel : Ahrefs MCP** — Connectez votre compte Ahrefs (plan Lite+) pour obtenir le Domain Rating réel, les données de backlinks, les mots-clés organiques avec positions, l'identification de concurrents, et Brand Radar (suivi des citations IA).
 
@@ -176,7 +178,8 @@ seo-geo-audit/
     │   ├── SKILL.md                    # Couche de données partagées
     │   └── references/
     │       ├── seo-standards.md        # Seuils & métriques (avec définitions CWV)
-    │       └── report-conventions.md   # Règles de formatage des rapports
+    │       ├── report-conventions.md   # Règles de formatage des rapports
+    │       └── gsc-regex-filters.md    # Patterns regex GSC (RE2) pour segmentation requêtes
     ├── seo-collector/
     │   └── SKILL.md                    # Crawler automatisé + Ahrefs MCP + audit analytics
     ├── seo-geo-audit/

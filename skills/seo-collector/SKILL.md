@@ -77,11 +77,36 @@ If connected (`github.com/googleanalytics/google-analytics-mcp`), pull real orga
 #### GSC MCP *(optional)*
 If connected (`github.com/ahonn/mcp-server-gsc`), pull real rankings, impressions, AI Overviews data, URL inspection.
 
+### Context window budget — `text_content_token_limit`
+
+> ⚠️ **CRITICAL — Apply token limits to ALL `web_fetch` calls.**
+>
+> A full audit generates 25-40 web calls. Without limits, `web_fetch` returns entire pages (10-15K tokens each), consuming 100-175K tokens and risking context overflow before the report is generated.
+>
+> **Always pass `text_content_token_limit`** to `web_fetch`. The SEO-relevant content (title, meta, H1, schema, headers) is concentrated in the `<head>` and early `<body>` — the rest is navigation, footer, ads, and noise.
+
+| Fetch target | `text_content_token_limit` | Why this limit |
+|---|---|---|
+| Homepage (HTML) | **4000** | `<head>` + H1/H2 + first content block — enough for title, meta, schema, OG tags, CMS markers |
+| robots.txt | **1000** | Always short — full AI bot rules fit easily |
+| sitemap.xml | **3000** | URL count + sample URLs + lastmod — don't need every URL |
+| Secondary/inner pages | **3000** | Same extraction as homepage, lighter |
+| Competitor pages | **3000** | Only need title, meta, H1, schema presence |
+| PageSpeed / external data | *(use `web_search`, no fetch needed)* | Search snippets are pre-truncated |
+
+**Example:**
+```
+web_fetch: [URL]  → text_content_token_limit: 4000
+web_fetch: [URL]/robots.txt  → text_content_token_limit: 1000
+```
+
+**Estimated savings: ~100K tokens per audit (from ~175K down to ~75K).**
+
 ### Base verification
 
 Before starting, test that the site is accessible:
 ```
-web_fetch: [URL]
+web_fetch: [URL] (text_content_token_limit: 4000)
 ```
 If error (timeout, 5xx, maintenance) → note and stop. If redirect → follow and note the final URL.
 
@@ -89,7 +114,7 @@ If error (timeout, 5xx, maintenance) → note and stop. If redirect → follow a
 
 ## Step 1: Homepage metadata collection
 
-Use `web_fetch` on the main URL and extract:
+Use `web_fetch` on the main URL **(with `text_content_token_limit: 4000`)** and extract:
 
 ### 1.1 Essential HTML tags
 
@@ -105,11 +130,11 @@ Look for markers in the HTML source: WordPress (`wp-content/`), Shopify (`cdn.sh
 
 ### 2.1 Robots.txt
 
-Fetch and parse robots.txt. For each AI bot (Googlebot, GPTBot, ChatGPT-User, PerplexityBot, ClaudeBot, anthropic-ai, Bingbot), determine if explicitly blocked, allowed, or inheriting from `User-agent: *`.
+Fetch and parse robots.txt **(with `text_content_token_limit: 1000`)**. For each AI bot (Googlebot, GPTBot, ChatGPT-User, PerplexityBot, ClaudeBot, anthropic-ai, Bingbot), determine if explicitly blocked, allowed, or inheriting from `User-agent: *`.
 
 ### 2.2 Sitemap XML
 
-Fetch sitemap.xml. Extract: existence, URL, type (index or urlset), total URL count, sample URLs, last modified date.
+Fetch sitemap.xml **(with `text_content_token_limit: 3000`)**. Extract: existence, URL, type (index or urlset), total URL count, sample URLs, last modified date.
 
 ---
 
@@ -123,7 +148,7 @@ If data is not found, estimate based on HTML analysis (page weight, script count
 
 ## Step 4: HTTPS & Security headers
 
-Analyze HTTP headers via `web_fetch`: HTTPS status, HSTS, Content-Security-Policy, X-Frame-Options, mixed content detection.
+Analyze HTTP headers via `web_fetch` **(with `text_content_token_limit: 2000`)**: HTTPS status, HSTS, Content-Security-Policy, X-Frame-Options, mixed content detection.
 
 ---
 
@@ -227,7 +252,7 @@ Check if the site preserves UTM parameters:
 
 ## Step 6: Sample pages crawl
 
-Crawl 3-5 additional pages (from sitemap or navigation). For each, collect the same data as Step 1.
+Crawl 3-5 additional pages (from sitemap or navigation) **(each with `text_content_token_limit: 3000`)**. For each, collect the same data as Step 1.
 
 ---
 
